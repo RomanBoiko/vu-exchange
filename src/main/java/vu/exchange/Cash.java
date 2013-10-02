@@ -5,16 +5,11 @@ import java.math.BigDecimal;
 public class Cash {
 	static enum Currency { GBP }
 
-	Currency currency = Currency.GBP;
-	BigDecimal amount;
+	final Currency currency;
+	final BigDecimal amount;
 
-	Cash setCurrency(Currency currency) {
+	public Cash(Currency currency, BigDecimal amount) {
 		this.currency = currency;
-		return this;
-	}
-
-	Cash setAmount(BigDecimal amount) {
 		this.amount = amount;
-		return this;
 	}
 }

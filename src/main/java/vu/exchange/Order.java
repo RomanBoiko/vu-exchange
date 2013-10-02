@@ -13,37 +13,27 @@ public class Order {
 	private static final Long SUFFIX_MULTIPLIER = Math.power(10L, ID_SUFFIX_LENGTH);
 
 	final Long id;
-	Long clientId;
-	Cash price;
-	BigDecimal quantity;
-	BuySell buySell;
+	final Long clientId;
+	final Long marketId;
+	final Cash price;
+	final BigDecimal quantity;
+	final BuySell buySell;
 
-	Order() {
+	public Order(Long clientId, Long marketId, Cash price, BigDecimal quantity, BuySell buySell) {
 		Long timestamp = System.currentTimeMillis();
 		this.id = (new Random().nextInt(ID_PREFIX_LIMIT) * SUFFIX_MULTIPLIER) + timestamp;
+		this.clientId = clientId;
+		this.marketId = marketId;
+		this.price = price;
+		this.quantity = quantity;
+		this.buySell = buySell;
+	}
+
+	Order() {
+		this(0L, 0L, null, BigDecimal.valueOf(0), BuySell.BUY);
 	}
 
 	Long timestamp() {
 		return id % SUFFIX_MULTIPLIER;
-	}
-
-	Order setClientId(Long clientId) {
-		this.clientId = clientId;
-		return this;
-	}
-
-	Order setPrice(Cash price) {
-		this.price = price;
-		return this;
-	}
-
-	Order setQuantity(BigDecimal quantity) {
-		this.quantity = quantity;
-		return this;
-	}
-
-	Order setBuySell(BuySell buySell) {
-		this.buySell = buySell;
-		return this;
 	}
 }
