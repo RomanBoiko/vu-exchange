@@ -10,7 +10,9 @@ import org.jeromq.ZMQ;
 public class Receiver {
 	static class RequestHandler {
 		void onMessage(String message) {
+			System.out.println("Order receiveed: " + message);
 			Order order = orderFromString(message);
+			System.out.println("Order parser: " + order);
 		}
 	}
 
@@ -50,13 +52,14 @@ public class Receiver {
 		}
 	}
 
-	static void sendOrder() {
+	static String sendOrder(String message) {
 		ZMQ.Context context = ZMQ.context(1);
 		ZMQ.Socket socket = context.socket(ZMQ.REQ);
 		socket.connect("tcp://127.0.0.1:5555");
-		socket.send("message".getBytes(), 0);
+		socket.send(message.getBytes(), 0);
 		String result = new String(socket.recv(0));
 		socket.close();
 		context.term();
+		return result;
 	}
 }
