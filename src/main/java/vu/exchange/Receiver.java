@@ -1,18 +1,55 @@
 package vu.exchange;
 
+import static java.lang.String.format;
+
+import java.io.File;
+import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.log4j.Logger;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.jeromq.ZMQ;
+import org.jeromq.ZMQException;
+
+import com.google.common.base.Charsets;
+import com.google.common.io.Files;
 
 public class Receiver {
-	static class RequestHandler {
-		void onMessage(String message) {
-			System.out.println("Order receiveed: " + message);
-			Order order = orderFromString(message);
-			System.out.println("Order parser: " + order);
+	static final String INPUT_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss:SSSz";
+
+	private final Logger log = Logger.getLogger(this.getClass());
+
+	private final File incomingEventsFile;
+	private final DateFormat dateFormat = new SimpleDateFormat(
+			INPUT_DATE_FORMAT);
+	private final CallableProcessor eventProcessor;
+
+	public Receiver(File incomingEventsFile, CallableProcessor eventProcessor) {
+		this.incomingEventsFile = incomingEventsFile;
+		this.eventProcessor = eventProcessor;
+	}
+
+	void onMessage(String message) {
+		Date arrivalTime = new Date(System.currentTimeMillis());
+		log.debug("Order receiveed: " + message);
+		Order order = orderFromString(message);
+		order.withArrivalTimestamp(arrivalTime);
+		persistIncomingEvent(arrivalTime, message);
+		log.debug("Order persisted");
+		eventProcessor.process(order);
+		log.debug("Order forwarded for further processing");
+	}
+
+	private void persistIncomingEvent(Date arrivalTime, String message) {
+		try {
+			Files.append(format("%s=%s\n", dateFormat.format(arrivalTime), message), incomingEventsFile, Charsets.UTF_8);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -27,39 +64,39 @@ public class Receiver {
 		}
 	}
 
-	static class Server implements Runnable {
-		final RequestHandler handler;
-		volatile AtomicBoolean toStop = new AtomicBoolean(false);
+}
 
-		Server(RequestHandler handler) {
-			this.handler = handler;
-		}
+class Server implements Runnable {// change using http://zguide.zeromq.org/java:mtserver
+	final Receiver receiver;
+	private volatile AtomicBoolean toStop = new AtomicBoolean(false);
+	private ZMQ.Socket socket;
+	private ZMQ.Context context;
 
-		@Override
-		public void run() {
-			ZMQ.Context context = ZMQ.context(1);
-			ZMQ.Socket socket = context.socket(ZMQ.REP);
-			socket.bind("tcp://127.0.0.1:5555");
-
-			while (!toStop.get()) {
-				byte[] msg = socket.recv(0);
-				handler.onMessage(new String(msg));
-
-				socket.send("{\"received\" : \"ok\"}", 0);
-			}
-			socket.close();
-			context.term();
-		}
+	Server(Receiver handler, ZMQ.Context context) {
+		this.receiver = handler;
+		this.context = context;
 	}
 
-	static String sendOrder(String message) {
-		ZMQ.Context context = ZMQ.context(1);
-		ZMQ.Socket socket = context.socket(ZMQ.REQ);
-		socket.connect("tcp://127.0.0.1:5555");
-		socket.send(message.getBytes(), 0);
-		String result = new String(socket.recv(0));
+	void stop() {
+		toStop.set(true);
 		socket.close();
-		context.term();
-		return result;
+	}
+
+	@Override
+	public void run() {
+		socket = context.socket(ZMQ.REP);
+		socket.bind("tcp://127.0.0.1:5555");
+
+		while (!toStop.get()) {
+			String msg = null;
+			try {
+				msg = new String(socket.recv(0));
+			} catch (ZMQException.CtxTerminated e) {
+				break;
+			}
+			receiver.onMessage(msg);
+
+			socket.send("{\"received\" : \"ok\"}", 0);
+		}
 	}
 }

@@ -5,6 +5,8 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 
+import java.util.Date;
+
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
@@ -13,6 +15,7 @@ public class OrderTest {
 	@Test
 	public void shouldGenerateOrderWithTimestampAsPartOfUniqueId() {
 		Order order = new Order();
+		order.withArrivalTimestamp(new Date());
 		Long orderTimestamp = order.timestamp();
 		Long orderId = order.id;
 		
@@ -20,7 +23,7 @@ public class OrderTest {
 		assertThat(orderId.toString().length(), Matchers.greaterThan(Order.ID_SUFFIX_LENGTH));
 		assertThat(orderId.toString().length(), Matchers.lessThanOrEqualTo(Order.ID_MAX_PREFIX_LENGTH + Order.ID_SUFFIX_LENGTH));
 		assertThat(orderId.toString(), endsWith(orderTimestamp.toString()));
-		assertThat(idPrefix(orderId), not(idPrefix(new Order().id)));
+		assertThat(idPrefix(orderId), not(idPrefix(new Order().withArrivalTimestamp(new Date()).id)));
 	}
 
 	private String idPrefix(Long id) {

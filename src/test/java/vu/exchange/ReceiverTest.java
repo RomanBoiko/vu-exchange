@@ -1,22 +1,41 @@
 package vu.exchange;
 
-import static org.junit.Assert.*;
-import static org.hamcrest.Matchers.*;
-import static vu.exchange.Order.*;
-import static vu.exchange.Receiver.sendOrder;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
 
+import java.io.File;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 
+import org.hamcrest.Matchers;
+import org.jeromq.ZMQ;
+import org.jeromq.ZMQ.Context;
+import org.junit.After;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.runners.MockitoJUnitRunner;
 
-import vu.exchange.Receiver.RequestHandler;
-import vu.exchange.Receiver.Server;
+import vu.exchange.Order.Currency;
+import vu.exchange.Order.Position;
 
+import com.google.common.base.Charsets;
+import com.google.common.io.Files;
+
+@RunWith(MockitoJUnitRunner.class)
 public class ReceiverTest {
 
 	private static final String TEST_ORDER =
 			"{\"client\":12, \"market\":43, \"price\":21.23, \"currency\":\"GBP\",\"quantity\":2.4,\"position\":\"BUY\"}";
 
+	private File incomingEventsFile = new File("target/testin.txt");
+
+	@After
+	public void after() {
+		incomingEventsFile.delete();
+	}
+	
 	@Test
 	public void shouldDeserializeOrder() {
 		Order order = Receiver.orderFromString(TEST_ORDER);
@@ -29,13 +48,30 @@ public class ReceiverTest {
 	}
 
 	@Test
-	public void shouldReceiveServerResponseViaMQ() throws Exception {
-		Server server = new Server(new RequestHandler());
+	public void shouldPersistEventAndSendResponseViaMQ() throws Exception {
+		Context context = ZMQ.context(1);
+		Server server = new Server(new Receiver(incomingEventsFile, mock(CallableProcessor.class)), context);
 		Thread serverThread = new Thread(server);
 		serverThread.start();
 		String response = sendOrder(TEST_ORDER);
-		assertThat(response, is("{\"received\" : \"ok\"}"));
-		server.toStop.set(true);
+		server.stop();
+		context.term();
 		serverThread.join();
+		String firstEvent = Files.readFirstLine(incomingEventsFile, Charsets.UTF_8);
+
+		assertThat(response, is("{\"received\" : \"ok\"}"));
+		assertThat(firstEvent, Matchers.endsWith("=" + TEST_ORDER));
+		assertNotNull(new SimpleDateFormat(Receiver.INPUT_DATE_FORMAT).parse(firstEvent.split("=")[0]));
+	}
+
+	static String sendOrder(String message) {
+		ZMQ.Context context = ZMQ.context(1);
+		ZMQ.Socket socket = context.socket(ZMQ.REQ);
+		socket.connect("tcp://127.0.0.1:5555");
+		socket.send(message.getBytes(), 0);
+		String result = new String(socket.recv(0));
+		socket.close();
+		context.term();
+		return result;
 	}
 }

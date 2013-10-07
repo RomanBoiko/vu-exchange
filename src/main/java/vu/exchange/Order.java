@@ -1,6 +1,7 @@
 package vu.exchange;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.Random;
 
 public class Order {
@@ -21,12 +22,16 @@ public class Order {
 	public BigDecimal quantity;
 	public Position position;
 
-	Order() {
-		Long timestamp = System.currentTimeMillis();
-		this.id = (new Random().nextInt(ID_PREFIX_LIMIT) * SUFFIX_MULTIPLIER) + timestamp;
+	Order withArrivalTimestamp(Date timestamp) {
+		this.id = (new Random().nextInt(ID_PREFIX_LIMIT) * SUFFIX_MULTIPLIER) + timestamp.getTime();
+		return this;
 	}
 
 	Long timestamp() {
 		return id % SUFFIX_MULTIPLIER;
 	}
+}
+
+enum OrderStatus {
+	ORDER_ACCEPTED
 }
