@@ -13,8 +13,8 @@ import org.apache.log4j.Logger;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.jeromq.ZMQ;
-import org.jeromq.ZMQException;
+import org.zeromq.ZMQ;
+import org.zeromq.ZMQException;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
@@ -91,7 +91,7 @@ class Server implements Runnable {// change using http://zguide.zeromq.org/java:
 			String msg = null;
 			try {
 				msg = new String(socket.recv(0));
-			} catch (ZMQException.CtxTerminated e) {
+			} catch (ZMQException.IOException e) {
 				break;
 			}
 			receiver.onMessage(msg);

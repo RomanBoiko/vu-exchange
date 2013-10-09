@@ -16,7 +16,7 @@ import org.apache.log4j.FileAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
-import org.jeromq.ZMQ;
+import org.zeromq.ZMQ;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
