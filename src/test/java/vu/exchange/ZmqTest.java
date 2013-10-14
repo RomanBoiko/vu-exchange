@@ -11,18 +11,19 @@ import org.zeromq.ZMQ.Poller;
 import java.util.Random;
 
 public class ZmqTest {
+	private enum User {CLIENT, WORKER}
+	private enum Action {SND, RCV}
 	private static Random rand = new Random(System.nanoTime());
 
 	private static class client_task implements Runnable {
-
+		private static int clientSequence = 0;
 		public void run() {
 			@SuppressWarnings("resource")
 			ZContext ctx = new ZContext();
 			Socket client = ctx.createSocket(ZMQ.DEALER);
 
-			String identity = String.format("%04X-%04X", rand.nextInt(),
-					rand.nextInt());
-			client.setIdentity(identity.getBytes());
+			String clientId = String.format("c"+ ++clientSequence);
+			client.setIdentity(clientId.getBytes());
 			client.connect("tcp://localhost:5570");
 
 			PollItem[] items = new PollItem[] { new PollItem(client,
@@ -35,11 +36,14 @@ public class ZmqTest {
 					ZMQ.poll(items, 10);
 					if (items[0].isReadable()) {
 						ZMsg msg = ZMsg.recvMsg(client);
-						msg.getLast().print(identity);
+//						msg.getLast().print(identity);
+						logAction(User.CLIENT, Action.RCV, clientId, new String(msg.getLast().getData()));
 						msg.destroy();
 					}
 				}
-				client.send(String.format("request #%d", ++requestNbr), 0);
+				String message = String.format("request #%d from %s", ++requestNbr, clientId);
+				client.send(message, 0);
+				logAction(User.CLIENT, Action.SND, clientId, message);
 			}
 			ctx.destroy();
 		}
@@ -56,7 +60,7 @@ public class ZmqTest {
 			backend.bind("inproc://backend");
 
 			for (int threadNbr = 0; threadNbr < 5; threadNbr++)
-				new Thread(new server_worker(ctx)).start();
+				new Thread(new Worker(ctx)).start();
 
 			ZMQ.proxy(frontend, backend, null);
 
@@ -64,22 +68,24 @@ public class ZmqTest {
 		}
 	}
 
-	private static class server_worker implements Runnable {
+	private static class Worker implements Runnable {
+		private static int workerSequence = 0;
 		private ZContext ctx;
 
-		public server_worker(ZContext ctx) {
+		public Worker(ZContext ctx) {
 			this.ctx = ctx;
 		}
 
 		public void run() {
 			Socket worker = ctx.createSocket(ZMQ.DEALER);
 			worker.connect("inproc://backend");
-
+			String workerId = "w" + ++workerSequence;
 			while (!Thread.currentThread().isInterrupted()) {
 				ZMsg msg = ZMsg.recvMsg(worker);
 				ZFrame address = msg.pop();
 				ZFrame content = msg.pop();
 				assert (content != null);
+				logAction(User.WORKER, Action.RCV, workerId, new String(content.getData()));
 				msg.destroy();
 
 				int replies = rand.nextInt(5);
@@ -89,7 +95,11 @@ public class ZmqTest {
 					} catch (InterruptedException e) {
 					}
 					address.send(worker, ZFrame.REUSE + ZFrame.MORE);
-					content.send(worker, ZFrame.REUSE);
+					String responseMsg = new String(content.getData()) + ": response from "+ workerId;
+					logAction(User.WORKER, Action.SND, workerId, responseMsg);
+					ZFrame response = new ZFrame(responseMsg);
+					response.send(worker, ZFrame.REUSE);
+					response.destroy();
 				}
 				address.destroy();
 				content.destroy();
@@ -101,12 +111,15 @@ public class ZmqTest {
 	public static void main(String[] args) throws Exception {
 		@SuppressWarnings("resource")
 		ZContext ctx = new ZContext();
-		new Thread(new client_task()).start();
-		new Thread(new client_task()).start();
+//		new Thread(new client_task()).start();
+//		new Thread(new client_task()).start();
 		new Thread(new client_task()).start();
 		new Thread(new server_task()).start();
 
 		Thread.sleep(5 * 1000);
 		ctx.destroy();
+	}
+	static void logAction(User user, Action action, String userId, String message) {
+		System.out.println(String.format("%s %s %s {%s}", user, userId, action, message));
 	}
 }

@@ -4,7 +4,17 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Random;
 
-public class Order {
+import org.codehaus.jackson.JsonFactory;
+import org.codehaus.jackson.JsonParser;
+import org.codehaus.jackson.map.ObjectMapper;
+
+public class ApiRequestParser {
+	Object fromJson(String json) {
+		return new Object();
+	}
+}
+
+class Order {
 	static enum Position { BUY, SELL }
 	static enum Currency { GBP }
 
@@ -15,6 +25,7 @@ public class Order {
 	private static final Long SUFFIX_MULTIPLIER = Math.power(10L, ID_SUFFIX_LENGTH);
 
 	public Long id;
+	public String sessionId;
 	public Long client;
 	public Long market;
 	public BigDecimal price;
@@ -30,8 +41,11 @@ public class Order {
 	Long timestamp() {
 		return id % SUFFIX_MULTIPLIER;
 	}
-}
 
-enum OrderStatus {
-	ORDER_ACCEPTED
+	static Order fromJson(String json) throws Exception {
+		JsonFactory f = new JsonFactory();
+		JsonParser parser = f.createJsonParser(json);
+		ObjectMapper mapper = new ObjectMapper();
+		return mapper.readValue(parser, Order.class);
+	}
 }

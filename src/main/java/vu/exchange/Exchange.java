@@ -7,8 +7,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.lang.management.ManagementFactory;
 import java.util.Properties;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.DailyRollingFileAppender;
@@ -16,7 +14,8 @@ import org.apache.log4j.FileAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
-import org.zeromq.ZMQ;
+
+import vu.exchange.RequestHandler.RequestHandlerFactory;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
@@ -34,12 +33,10 @@ public class Exchange {
 						"Pid file exists, another instance of application could be already running");
 			} else {
 				appContext.appPidFile().getParentFile().mkdirs();
-				Files.write(currentProcessId(), appContext.appPidFile(),
-						Charsets.UTF_8);
+				Files.write(currentProcessId(), appContext.appPidFile(), Charsets.UTF_8);
 			}
 			Exchange exchange = new Exchange(appContext).start();
-			log.info(String.format("app started using config: %s",
-					config.getAbsolutePath()));
+			log.info(String.format("app started using config: %s", config.getAbsolutePath()));
 			while (appContext.appPidFile().exists()) {
 				Thread.sleep(2 * 1000);
 			}
@@ -58,37 +55,38 @@ public class Exchange {
 	}
 
 	private final AppContext appContext;
-	private final ZMQ.Context zmqContext;
-	private final ExecutorService inputMessageReceiversPool;
-	private final ExchangeDisruptor businessProcessorDisruptor;
-	private final ExchangeDisruptor eventPublisherDisruptor;
+	private final ExchangeDisruptor requestSubmitDisruptor;
+	private final ExchangeDisruptor responsePublishDisruptor;
+	private final RequestResponseRepo requestResponseRepo = new RequestResponseRepo();
+	private final ApiServer apiServer;
 
 	Exchange(AppContext context) {
 		this.appContext = context;
-		this.zmqContext = ZMQ.context(1);
-		Publisher eventsPublisher = new Publisher();
-		this.eventPublisherDisruptor = singleProducerMultipleConsumers(eventsPublisher);
-		BusinessProcessor businessProcessor = new BusinessProcessor(
-				eventPublisherDisruptor);
-		this.businessProcessorDisruptor = multipleProducersSingleConsumer(businessProcessor);
-		this.inputMessageReceiversPool = Executors.newFixedThreadPool(context
-				.inputReceiversCount());
+		ResponsePublisher responsesPublisher = new ResponsePublisher(requestResponseRepo);
+		this.responsePublishDisruptor = singleProducerMultipleConsumers(responsesPublisher);
+		BusinessProcessor businessProcessor = new BusinessProcessor(responsePublishDisruptor);
+		this.requestSubmitDisruptor = multipleProducersSingleConsumer(businessProcessor);
+		RequestHandlerFactory requestHandlerFactory = new RequestHandlerFactory(
+				requestResponseRepo,
+				appContext.inputEventsFile(),
+				requestSubmitDisruptor);
+		this.apiServer = new ApiServer()
+			.withApiPort(5555)
+			.withNumberOfWorkers(context.inputReceiversCount())
+			.withRequestHandlerFactory(requestHandlerFactory);
 	}
 
 	Exchange start() {
-		eventPublisherDisruptor.start();
-		businessProcessorDisruptor.start();
-		for (int i = 0; i < appContext.inputReceiversCount(); i++) {
-			inputMessageReceiversPool
-					.submit(new Server(new Receiver(appContext
-							.inputEventsFile(), businessProcessorDisruptor),
-							zmqContext));
-		}
+		responsePublishDisruptor.start();
+		requestSubmitDisruptor.start();
+		apiServer.start();
 		return this;
 	}
 
-	void stop() {
-		inputMessageReceiversPool.shutdown();
+	void stop() throws Exception {
+		apiServer.stop();
+		requestSubmitDisruptor.stop();
+		responsePublishDisruptor.stop();
 	}
 
 	private static void initLogging(AppContext appContext) {
@@ -137,7 +135,6 @@ class AppContext {
 	String appLogFormat() {
 		return this.property("app.log.format");
 	}
-	
 
 	Integer inputReceiversCount() {
 		return Integer.parseInt(this.property("input.receivers.count"));

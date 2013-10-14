@@ -11,7 +11,7 @@ import com.lmax.disruptor.YieldingWaitStrategy;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
 
-public class ExchangeDisruptor implements CallableProcessor {
+public class ExchangeDisruptor {
 	private Disruptor<ValueEvent> disruptor;
 	private ExecutorService exec;
 	private final EventHandler<ValueEvent> handler;
