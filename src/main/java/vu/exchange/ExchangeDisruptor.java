@@ -51,14 +51,15 @@ public class ExchangeDisruptor {
 		disruptor.shutdown();
 		exec.shutdown();
 	}
-}
 
-class ValueEventTranslator implements EventTranslatorOneArg<ValueEvent, Object> {
-	@Override
-	public void translateTo(ValueEvent valueEvent, long sequence, Object event) {
-		valueEvent.setValue(event);
+	static class ValueEventTranslator implements EventTranslatorOneArg<ValueEvent, Object> {
+		@Override
+		public void translateTo(ValueEvent valueEvent, long sequence, Object event) {
+			valueEvent.setValue(event);
+		}
 	}
 }
+
 
 class ValueEvent {
 	private Object event;

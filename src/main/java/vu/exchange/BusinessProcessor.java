@@ -20,7 +20,7 @@ public class BusinessProcessor implements EventHandler<ValueEvent>{
 	public void onEvent(final ValueEvent event, final long sequence, final boolean endOfBatch) throws Exception {
 		RequestDTO requestDTO = (RequestDTO) event.getValue();
 		log.debug(format("Processing business event: Sequence: %s; Thread: %s; ValueEvent: %s", sequence, Thread.currentThread().getName(), event.getValue()));
-		eventProcessor.process(new ResponseDTO(requestDTO, OrderStatus.ORDER_ACCEPTED));
+		eventProcessor.process(new ResponseDTO(requestDTO, OrderStatus.ACCEPTED));
 		log.debug("Request processed, response sent");
 	}
 }
