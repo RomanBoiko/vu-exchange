@@ -58,6 +58,9 @@ class RequestHandler {
 			this.requestResponseRepo = repo;
 			this.incomingEventsFile = eventsFile;
 			this.eventProcessor = eventProcessor;
+			if(!incomingEventsFile.getParentFile().exists()) {
+				incomingEventsFile.getParentFile().mkdirs();
+			}
 		}
 
 		RequestHandler createHandler() {

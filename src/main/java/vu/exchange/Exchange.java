@@ -21,6 +21,8 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 
 public class Exchange {
+	private final Logger log = Logger.getLogger(this.getClass());
+
 	public static void main(String[] args) {
 		try {
 			File config = new File(args[0]);
@@ -28,21 +30,26 @@ public class Exchange {
 			AppContext appContext = new AppContext(config);
 			initLogging(appContext);
 			Logger log = Logger.getLogger(Exchange.class);
-			if (appContext.appPidFile().exists()) {
+			if (appContext.appLockFile().exists()) {
 				throw new IllegalStateException(
-						"Pid file exists, another instance of application could be already running");
+						"Lock file exists, another instance of application could be already running");
 			} else {
 				appContext.appPidFile().getParentFile().mkdirs();
 				Files.write(currentProcessId(), appContext.appPidFile(), Charsets.UTF_8);
+				log.info("PID file written: " + appContext.appPidFile().getAbsolutePath());
+				Files.write(currentProcessId(), appContext.appLockFile(), Charsets.UTF_8);
+				log.info("Lock file written: " + appContext.appLockFile().getAbsolutePath());
 			}
 			Exchange exchange = new Exchange(appContext).start();
 			log.info(String.format("app started using config: %s", config.getAbsolutePath()));
-			while (appContext.appPidFile().exists()) {
+			while (appContext.appLockFile().exists()) {
 				Thread.sleep(2 * 1000);
 			}
+			log.info("Lock file disappeared, stopping app");
 			exchange.stop();
+			log.info("Deleting PID file");
 			appContext.appPidFile().delete();
-			log.info("app stopped, pid file removed");
+			log.info("app stopped, pid and lock files removed");
 		} catch (Exception e) {
 			System.err.println("error in application, exiting");
 			throw new RuntimeException(e);
@@ -67,13 +74,11 @@ public class Exchange {
 		BusinessProcessor businessProcessor = new BusinessProcessor(responsePublishDisruptor);
 		this.requestSubmitDisruptor = multipleProducersSingleConsumer(businessProcessor);
 		RequestHandlerFactory requestHandlerFactory = new RequestHandlerFactory(
-				requestResponseRepo,
-				appContext.inputEventsFile(),
+				requestResponseRepo, appContext.inputEventsFile(),
 				requestSubmitDisruptor);
-		this.apiServer = new ApiServer()
-			.withApiPort(5555)
-			.withNumberOfWorkers(context.inputReceiversCount())
-			.withRequestHandlerFactory(requestHandlerFactory);
+		this.apiServer = new ApiServer().withApiPort(5555)
+				.withNumberOfWorkers(context.inputReceiversCount())
+				.withRequestHandlerFactory(requestHandlerFactory);
 	}
 
 	Exchange start() {
@@ -84,9 +89,14 @@ public class Exchange {
 	}
 
 	void stop() throws Exception {
+		log.info("Stopping exchange");
 		apiServer.stop();
+		log.info("External API server stopped");
 		requestSubmitDisruptor.stop();
+		log.info("Request disruptor stopped");
 		responsePublishDisruptor.stop();
+		log.info("Response disruptor stopped");
+		log.info("Exchange stopped");
 	}
 
 	private static void initLogging(AppContext appContext) {
@@ -106,41 +116,49 @@ public class Exchange {
 		Logger.getRootLogger().addAppender(console);
 		Logger.getRootLogger().addAppender(fa);
 	}
-}
 
-class AppContext {
-	private final Properties appProperties;
+	static class AppContext {
+		private final Properties appProperties;
 
-	AppContext(File config) {
-		try {
-			appProperties = new Properties();
-			appProperties.load(new FileInputStream(config));
-		} catch (Exception e) {
-			throw new RuntimeException(e);
+		AppContext(File config) {
+			try {
+				appProperties = new Properties();
+				appProperties.load(new FileInputStream(config));
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
 		}
-	}
 
-	File inputEventsFile() {
-		return new File(this.property("input.events.journal"));
-	}
+		File inputEventsFile() {
+			return new File(this.property("input.events.journal"));
+		}
 
-	File appPidFile() {
-		return new File(this.property("app.pid.file"));
-	}
+		File appPidFile() {
+			return new File(this.property("app.pid.file"));
+		}
 
-	String appLogFilePath() {
-		return this.property("app.log.file");
-	}
+		File appLockFile() {
+			return new File(this.property("app.lock.file"));
+		}
 
-	String appLogFormat() {
-		return this.property("app.log.format");
-	}
+		String appLogFilePath() {
+			return this.property("app.log.file");
+		}
 
-	Integer inputReceiversCount() {
-		return Integer.parseInt(this.property("input.receivers.count"));
-	}
+		String appLogFormat() {
+			return this.property("app.log.format");
+		}
 
-	String property(String key) {
-		return appProperties.getProperty(key);
+		Integer inputReceiversCount() {
+			return Integer.parseInt(this.property("input.receivers.count"));
+		}
+
+		String apiTcpPort() {
+			return this.property("api.tcp.port");
+		}
+
+		String property(String key) {
+			return appProperties.getProperty(key);
+		}
 	}
 }

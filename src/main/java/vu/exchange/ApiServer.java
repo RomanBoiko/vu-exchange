@@ -19,6 +19,7 @@ public class ApiServer implements Runnable {
 	private static final String API_URL_TEMPLATE = "tcp://*:%s";
 	private static final String WORKERS_URL = "inproc://backend";
 
+	private final Logger log = Logger.getLogger(this.getClass());
 	private RequestHandlerFactory requestHandlerFactory;
 	private ZContext context;
 	private int port = 5555;
@@ -43,21 +44,25 @@ public class ApiServer implements Runnable {
 	}
 
 	public ApiServer start() {
+		log.info("Starting ApiServer");
 		serverThread.start();
+		log.info("ApiServer started");
 		return this;
 	}
 
 	void stop() throws Exception {
+		log.info("Stopping ApiServer");
 		workersExecutorService.shutdown();
-		serverThread.join();
+		log.info("External workers stopped");
+		serverThread.stop();
+		log.info("ApiServer stopped");
 	}
-	
+
 	public void run() {
 		context = new ZContext();
-
 		Socket frontend = context.createSocket(ZMQ.ROUTER);
 		frontend.bind(format(API_URL_TEMPLATE, port));
-
+		
 		Socket backend = context.createSocket(ZMQ.DEALER);
 		backend.bind(WORKERS_URL);
 		
@@ -65,8 +70,8 @@ public class ApiServer implements Runnable {
 		for (int threadNbr = 0; threadNbr < workersNumber; threadNbr++) {
 			workersExecutorService.submit(new Worker(context, requestHandlerFactory.createHandler()));
 		}
+		log.info("External workers started");
 		ZMQ.proxy(frontend, backend, null);
-		context.destroy();
 	}
 
 	static class Worker implements Runnable {
