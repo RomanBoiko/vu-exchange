@@ -1,7 +1,6 @@
 package vu.exchange;
 
 import java.math.BigDecimal;
-import java.util.Currency;
 
 import org.codehaus.jackson.map.ObjectMapper;
 

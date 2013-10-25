@@ -1,5 +1,7 @@
 package vu.exchange;
 
+import static java.lang.String.format;
+
 import static vu.exchange.ExchangeDisruptor.multipleProducersSingleConsumer;
 import static vu.exchange.ExchangeDisruptor.singleProducerMultipleConsumers;
 
@@ -21,7 +23,7 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 
 public class Exchange {
-	private final Logger log = Logger.getLogger(this.getClass());
+	private static Logger log = Logger.getLogger(Exchange.class);
 
 	public static void main(String[] args) {
 		try {
@@ -29,36 +31,45 @@ public class Exchange {
 			assert config.exists() && config.isFile();
 			AppContext appContext = new AppContext(config);
 			initLogging(appContext);
-			Logger log = Logger.getLogger(Exchange.class);
-			if (appContext.appLockFile().exists()) {
-				throw new IllegalStateException(
-						"Lock file exists, another instance of application could be already running");
-			} else {
-				appContext.appPidFile().getParentFile().mkdirs();
-				Files.write(currentProcessId(), appContext.appPidFile(), Charsets.UTF_8);
-				log.info("PID file written: " + appContext.appPidFile().getAbsolutePath());
-				Files.write(currentProcessId(), appContext.appLockFile(), Charsets.UTF_8);
-				log.info("Lock file written: " + appContext.appLockFile().getAbsolutePath());
-			}
-			Exchange exchange = new Exchange(appContext).start();
-			log.info(String.format("app started using config: %s", config.getAbsolutePath()));
-			while (appContext.appLockFile().exists()) {
-				Thread.sleep(2 * 1000);
-			}
-			log.info("Lock file disappeared, stopping app");
-			exchange.stop();
-			log.info("Deleting PID file");
-			appContext.appPidFile().delete();
-			log.info("app stopped, pid and lock files removed");
+			log = Logger.getLogger(Exchange.class);
+			log.info(format("Run app using config: %s", config.getAbsolutePath()));
+			startApp(appContext).keepAppRunning().stop();
 		} catch (Exception e) {
 			System.err.println("error in application, exiting");
 			throw new RuntimeException(e);
 		}
 	}
 
+	private static Exchange startApp(AppContext appContext) throws Exception {
+		if (appContext.appLockFile().exists()) {
+			throw new IllegalStateException("Lock file exists, another instance of application running?");
+		} else {
+			createApplicationFiles(appContext);
+		}
+		Exchange exchange = new Exchange(appContext).start();
+		log.info("App started");
+		return exchange;
+	}
+
+	private static void createApplicationFiles(AppContext appContext) throws Exception {
+		appContext.appPidFile().getParentFile().mkdirs();
+		Files.write(currentProcessId(), appContext.appPidFile(), Charsets.UTF_8);
+		log.info("PID file written: " + appContext.appPidFile().getAbsolutePath());
+		Files.write(currentProcessId(), appContext.appLockFile(), Charsets.UTF_8);
+		log.info("Lock file written: " + appContext.appLockFile().getAbsolutePath());
+	}
+
 	private static String currentProcessId() {
 		final String jvmName = ManagementFactory.getRuntimeMXBean().getName();
 		return jvmName.substring(0, jvmName.indexOf('@'));
+	}
+
+	private Exchange keepAppRunning() throws Exception {
+		while (appContext.appLockFile().exists()) {
+			Thread.sleep(2 * 1000);
+		}
+		log.info("Lock file disappeared, stopping app");
+		return this;
 	}
 
 	private final AppContext appContext;
@@ -96,7 +107,9 @@ public class Exchange {
 		log.info("Request disruptor stopped");
 		responsePublishDisruptor.stop();
 		log.info("Response disruptor stopped");
-		log.info("Exchange stopped");
+		log.info("Deleting PID file");
+		appContext.appPidFile().delete();
+		log.info("Exchange stopped, pid and lock files removed");
 	}
 
 	private static void initLogging(AppContext appContext) {

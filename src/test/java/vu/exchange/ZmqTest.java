@@ -1,14 +1,14 @@
 package vu.exchange;
 
+import java.util.Random;
+
 import org.zeromq.ZContext;
 import org.zeromq.ZFrame;
 import org.zeromq.ZMQ;
 import org.zeromq.ZMQ.PollItem;
+import org.zeromq.ZMQ.Poller;
 import org.zeromq.ZMQ.Socket;
 import org.zeromq.ZMsg;
-import org.zeromq.ZMQ.Poller;
-
-import java.util.Random;
 
 public class ZmqTest {
 	private enum User {CLIENT, WORKER}
@@ -18,7 +18,6 @@ public class ZmqTest {
 	private static class client_task implements Runnable {
 		private static int clientSequence = 0;
 		public void run() {
-			@SuppressWarnings("resource")
 			ZContext ctx = new ZContext();
 			Socket client = ctx.createSocket(ZMQ.DEALER);
 
@@ -109,7 +108,6 @@ public class ZmqTest {
 	}
 
 	public static void main(String[] args) throws Exception {
-		@SuppressWarnings("resource")
 		ZContext ctx = new ZContext();
 //		new Thread(new client_task()).start();
 //		new Thread(new client_task()).start();
