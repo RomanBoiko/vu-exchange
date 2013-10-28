@@ -23,7 +23,7 @@ class RequestHandler {
 	private final DateFormat dateFormat = new SimpleDateFormat(INPUT_DATE_FORMAT);
 	private final DisruptorWrapper eventProcessor;
 	private final RequestResponseRepo requestResponseRepo;
-	private final ApiResponseSerializer apiResponseSerializer = new ApiResponseSerializer();
+	private final ApiResponse apiResponseSerializer = new ApiResponse();
 
 	private RequestHandler(RequestResponseRepo requestResponseRepo, File incomingEventsFile, DisruptorWrapper eventProcessor) {
 		this.incomingEventsFile = incomingEventsFile;
@@ -33,12 +33,12 @@ class RequestHandler {
 
 	String getResponseMessage(String requestMessage) throws Exception {
 		Date arrivalTime = new Date(System.currentTimeMillis());
-		log.debug("Order received: " + requestMessage);
-		Order order = Order.fromJson(requestMessage);
-		order.withArrivalTimestamp(arrivalTime);
+		log.debug("Request received: " + requestMessage);
+		ApiRequest apiRequest = ApiRequest.fromJson(requestMessage);
+		apiRequest.withArrivalTimestamp(arrivalTime);
 		persistIncomingEvent(arrivalTime, requestMessage);
-		log.debug("Order persisted");
-		RequestDTO requestDto = requestResponseRepo.request(order);
+		log.debug("Request persisted");
+		RequestDTO requestDto = requestResponseRepo.request(apiRequest);
 		eventProcessor.process(requestDto);
 		log.debug("Request forwarded for further processing");
 		requestDto.waitForResponse();

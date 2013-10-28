@@ -14,7 +14,7 @@ import org.junit.Test;
 import vu.exchange.Order.Currency;
 import vu.exchange.Order.Position;
 
-public class OrderTest {
+public class ApiRequestTest {
 
 	@Test
 	public void shouldGenerateOrderWithTimestampAsPartOfUniqueId() {
@@ -32,7 +32,7 @@ public class OrderTest {
 
 	@Test
 	public void shouldDeserializeOrder() throws Exception {
-		Order order = Order.fromJson(TestMessageRepo.BUY_ORDER);
+		Order order = (Order)ApiRequest.fromJson(TestMessageRepo.BUY_ORDER);
 		assertThat(order.client, is(12L));
 		assertThat(order.market, is(43L));
 		assertThat(order.price, is(BigDecimal.valueOf(21.23)));

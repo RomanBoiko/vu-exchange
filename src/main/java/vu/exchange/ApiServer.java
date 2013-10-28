@@ -1,6 +1,5 @@
 package vu.exchange;
 
-
 import static java.lang.String.format;
 
 import java.util.concurrent.ExecutorService;
@@ -87,8 +86,13 @@ public class ApiServer implements Runnable {
 			this.requestHandler = requestHandler;
 		}
 	
-		private String getResponse(String request) throws Exception {
-			return requestHandler.getResponseMessage(request);
+		private String getResponse(String request) {
+			try {
+				return requestHandler.getResponseMessage(request);
+			} catch (Exception e) {
+				log.error(e);
+				return String.format("{\"error\" : \"%s\", \"onRequest\" : %s}", e.getMessage(), request);
+			}
 		}
 
 		public void run() {
@@ -104,13 +108,7 @@ public class ApiServer implements Runnable {
 				log.debug(format("Request received by worker %s: %s", workerId, request));
 				msg.destroy();
 				address.send(worker, ZFrame.REUSE + ZFrame.MORE);
-				String responseMsg;
-				try {
-					responseMsg = getResponse(request);
-				} catch (Exception e) {
-					log.error(e);
-					responseMsg = String.format("{\"error\" : \"%s\", \"onRequest\" : %s}", e.getMessage(), request);
-				}
+				String responseMsg = getResponse(request);
 				log.debug(format("Reply sent by worker %s: %s", workerId, responseMsg));
 				ZFrame response = new ZFrame(responseMsg);
 				response.send(worker, ZFrame.REUSE);

@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 
 import org.codehaus.jackson.map.ObjectMapper;
 
-public class ApiResponseSerializer {
+public class ApiResponse {
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
 	public String toJson(Object response) throws Exception {
@@ -13,6 +13,9 @@ public class ApiResponseSerializer {
 }
 
 class OrderSubmitResult {
+	enum OrderStatus {
+		ACCEPTED, REJECTED;
+	}
 	public String type = this.getClass().getSimpleName();
 	public String orderId;
 	public OrderStatus status;
@@ -20,20 +23,16 @@ class OrderSubmitResult {
 	OrderSubmitResult withStatus(OrderStatus status) {this.status = status; return this;}
 }
 
-enum OrderStatus {
-	ACCEPTED, REJECTED;
-}
 
 class LoginResult {
+	enum LoginStatus {
+		OK, NO_SUCH_USER, WRONG_PASSWORD, ALREADY_LOGGED_IN
+	}
 	public String type = this.getClass().getSimpleName();
 	public String sessionId;
 	public LoginStatus status;
 	LoginResult withSessionId(String sessionId) {this.sessionId = sessionId; return this;}
 	LoginResult withStatus(LoginStatus status) {this.status = status; return this;}
-}
-
-enum LoginStatus {
-	OK, NO_SUCH_USER, WRONG_PASSWORD, ALREADY_LOGGED_IN
 }
 
 class AccountState {

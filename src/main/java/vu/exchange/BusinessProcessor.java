@@ -4,6 +4,7 @@ import static java.lang.String.format;
 
 import org.apache.log4j.Logger;
 
+import vu.exchange.OrderSubmitResult.OrderStatus;
 import vu.exchange.RequestResponseRepo.RequestDTO;
 import vu.exchange.RequestResponseRepo.ResponseDTO;
 
@@ -19,7 +20,7 @@ public class BusinessProcessor implements EventHandler<ValueEvent>{
 
 	public void onEvent(final ValueEvent event, final long sequence, final boolean endOfBatch) throws Exception {
 		RequestDTO requestDTO = (RequestDTO) event.getValue();
-		log.debug(format("Processing business event: Sequence: %s; Thread: %s; ValueEvent: %s", sequence, Thread.currentThread().getName(), event.getValue()));
+		log.debug(format("Processing business event: Sequence: %s; ValueEvent: %s", sequence, event.getValue()));
 		Order requestOrder = (Order)requestDTO.request;
 		OrderSubmitResult result = new OrderSubmitResult().withOrderId(requestOrder.id.toString()).withStatus(OrderStatus.ACCEPTED);
 		eventProcessor.process(new ResponseDTO(requestDTO, result));
