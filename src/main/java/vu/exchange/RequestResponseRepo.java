@@ -58,8 +58,8 @@ public class RequestResponseRepo {
 	}
 
 	static class ResponseDTO {
-		private final UUID key;
-		private final Object response;
+		final UUID key;
+		final Object response;
 		public ResponseDTO(RequestDTO request, Object response) {
 			this.key = request.key;
 			this.response = response;

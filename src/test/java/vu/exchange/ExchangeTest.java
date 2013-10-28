@@ -1,5 +1,6 @@
 package vu.exchange;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -33,7 +34,8 @@ public class ExchangeTest {
 		exchange.start();
 		String response = sendMessage(TestMessageRepo.BUY_ORDER);
 		exchange.stop();
-		assertThat(response, is("ACCEPTED"));
+		assertThat(response, containsString("\"type\":\"OrderSubmitResult\""));
+		assertThat(response, containsString("\"status\":\"ACCEPTED\""));
 	}
 	
 	@Test
