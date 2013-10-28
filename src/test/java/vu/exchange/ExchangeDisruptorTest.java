@@ -24,6 +24,7 @@ public class ExchangeDisruptorTest {
 		for (long i = 0; i < 20; i++) {
 			disruptor.process(i);
 		}
+		Thread.sleep(20);
 		disruptor.stop();
 		verify(handler, times(20)).onEvent(any(ValueEvent.class), any(Long.class), any(Boolean.class));
 	}

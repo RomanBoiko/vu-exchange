@@ -50,12 +50,11 @@ public class ApiServer implements Runnable {
 		return this;
 	}
 
-	@SuppressWarnings("deprecation")
 	void stop() throws Exception {
 		log.info("Stopping ApiServer");
 		workersExecutorService.shutdown();
 		log.info("External workers stopped");
-		serverThread.stop();
+		serverThread.interrupt();
 		log.info("ApiServer stopped");
 	}
 

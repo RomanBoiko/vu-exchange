@@ -15,7 +15,6 @@ import org.zeromq.ZMQ.Poller;
 import org.zeromq.ZMQ.Socket;
 import org.zeromq.ZMsg;
 
-import vu.exchange.Exchange.AppContext;
 
 public class ExchangeTest {
 
