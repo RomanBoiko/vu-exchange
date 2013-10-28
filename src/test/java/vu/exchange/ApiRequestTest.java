@@ -17,6 +17,7 @@ import vu.exchange.Order.Position;
 public class ApiRequestTest {
 
 	private static final String TEST_ORDER = "{\"type\":\"Order\",\"session\":\"sessionId\",\"market\":1,\"price\":1.1,\"currency\":\"GBP\",\"quantity\":1.2,\"position\":\"SELL\"}";
+	private static final String TEST_LOGIN = "{\"type\":\"Login\",\"email\":\"email@email.com\",\"password\":\"pass\"}";
 
 	@Test
 	public void shouldGenerateOrderWithTimestampAsPartOfUniqueId() {
@@ -34,9 +35,8 @@ public class ApiRequestTest {
 
 	@Test
 	public void shouldSerializeOrder() throws Exception {
-		Order order = new Order().withMarket(1L).withPosition(Position.SELL).withPrice(1.1).withQuantity(1.2).withSession("sessionId");
-		String serializedOrder = order.toJson();
-		assertThat(serializedOrder, is(TEST_ORDER));
+		String orderRequest = new Order().withMarket(1L).withPosition(Position.SELL).withPrice(1.1).withQuantity(1.2).withSession("sessionId").toJson();
+		assertThat(orderRequest, is(TEST_ORDER));
 	}
 
 	@Test
@@ -47,6 +47,19 @@ public class ApiRequestTest {
 		assertThat(order.currency, is(Currency.GBP));
 		assertThat(order.quantity, is(BigDecimal.valueOf(1.2)));
 		assertThat(order.position, is(Position.SELL));
+	}
+
+	@Test
+	public void shouldSerializeLogin() throws Exception {
+		String loginRequest = new Login().withEmail("email@email.com").withPassword("pass").toJson();
+		assertThat(loginRequest, is(TEST_LOGIN));
+	}
+
+	@Test
+	public void shouldDeserializeLogin() throws Exception {
+		Login login = (Login)ApiRequest.fromJson(TEST_LOGIN);
+		assertThat(login.email, is("email@email.com"));
+		assertThat(login.password, is("pass"));
 	}
 
 	private String idPrefix(Long id) {

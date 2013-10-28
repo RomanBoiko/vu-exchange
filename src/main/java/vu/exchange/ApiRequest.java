@@ -2,11 +2,13 @@ package vu.exchange;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.Map;
 import java.util.Random;
 
 import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.ObjectMapper;
+
+import com.google.common.collect.ImmutableMap;
 
 public abstract class ApiRequest {
 	static final int ID_MAX_PREFIX_LENGTH = 5;
@@ -20,11 +22,17 @@ public abstract class ApiRequest {
 		return (new Random().nextInt(ID_PREFIX_LIMIT) * SUFFIX_MULTIPLIER) + timestamp.getTime();
 	}
 
+	static final Map<String, Class<? extends ApiRequest>> requestNameToClass = ImmutableMap.of(
+			Order.class.getSimpleName(), Order.class,
+			Login.class.getSimpleName(), Login.class);
+
 	static ApiRequest fromJson(String json) throws Exception {
-		JsonFactory f = new JsonFactory();
-		JsonParser parser = f.createJsonParser(json);
+		JsonFactory jsonFactory = new JsonFactory();
 		ObjectMapper mapper = new ObjectMapper();
-		return mapper.readValue(parser, Order.class);
+		return mapper.readValue(
+				jsonFactory.createJsonParser(json),
+				requestNameToClass.get(
+						mapper.readTree(jsonFactory.createJsonParser(json)).get("type").getTextValue()));
 	}
 
 	private Long id = requestId(new Date());
@@ -63,7 +71,8 @@ class Order extends ApiRequest {
 	Order withSession(String session) {this.session = session; return this;}
 }
 
-class Login {
+class Login extends ApiRequest {
+	public String type = this.getClass().getSimpleName();
 	public String email = "some@somewhere.com";
 	public String password = "pass";
 
