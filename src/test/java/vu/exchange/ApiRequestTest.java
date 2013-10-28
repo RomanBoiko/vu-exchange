@@ -16,8 +16,9 @@ import vu.exchange.Order.Position;
 
 public class ApiRequestTest {
 
-	private static final String TEST_ORDER = "{\"type\":\"Order\",\"session\":\"sessionId\",\"market\":1,\"price\":1.1,\"currency\":\"GBP\",\"quantity\":1.2,\"position\":\"SELL\"}";
-	private static final String TEST_LOGIN = "{\"type\":\"Login\",\"email\":\"email@email.com\",\"password\":\"pass\"}";
+	private static final String ORDER = "{\"type\":\"Order\",\"session\":\"sessionId\",\"market\":1,\"price\":1.1,\"currency\":\"GBP\",\"quantity\":1.2,\"position\":\"SELL\"}";
+	private static final String LOGIN = "{\"type\":\"Login\",\"email\":\"email@email.com\",\"password\":\"pass\"}";
+	private static final String ACCOUNT_STATE_REQUEST = "{\"type\":\"AccountStateRequest\",\"session\":\"sessionId\"}";
 
 	@Test
 	public void shouldGenerateOrderWithTimestampAsPartOfUniqueId() {
@@ -36,30 +37,42 @@ public class ApiRequestTest {
 	@Test
 	public void shouldSerializeOrder() throws Exception {
 		String orderRequest = new Order().withMarket(1L).withPosition(Position.SELL).withPrice(1.1).withQuantity(1.2).withSession("sessionId").toJson();
-		assertThat(orderRequest, is(TEST_ORDER));
+		assertThat(orderRequest, is(ORDER));
 	}
 
 	@Test
 	public void shouldDeserializeOrder() throws Exception {
-		Order order = (Order)ApiRequest.fromJson(TEST_ORDER);
+		Order order = (Order)ApiRequest.fromJson(ORDER);
 		assertThat(order.market, is(1L));
 		assertThat(order.price, is(BigDecimal.valueOf(1.1)));
 		assertThat(order.currency, is(Currency.GBP));
 		assertThat(order.quantity, is(BigDecimal.valueOf(1.2)));
 		assertThat(order.position, is(Position.SELL));
+		assertThat(order.session, is("sessionId"));
 	}
 
 	@Test
 	public void shouldSerializeLogin() throws Exception {
 		String loginRequest = new Login().withEmail("email@email.com").withPassword("pass").toJson();
-		assertThat(loginRequest, is(TEST_LOGIN));
+		assertThat(loginRequest, is(LOGIN));
 	}
 
 	@Test
 	public void shouldDeserializeLogin() throws Exception {
-		Login login = (Login)ApiRequest.fromJson(TEST_LOGIN);
+		Login login = (Login)ApiRequest.fromJson(LOGIN);
 		assertThat(login.email, is("email@email.com"));
 		assertThat(login.password, is("pass"));
+	}
+
+	@Test
+	public void shouldSerializeAccountStateRequest() throws Exception {
+		assertThat(new AccountStateRequest().withSession("sessionId").toJson(), is(ACCOUNT_STATE_REQUEST));
+	}
+
+	@Test
+	public void shouldDeserializeAccountStateRequest() throws Exception {
+		AccountStateRequest accountRequest = (AccountStateRequest)ApiRequest.fromJson(ACCOUNT_STATE_REQUEST);
+		assertThat(accountRequest.session, is("sessionId"));
 	}
 
 	private String idPrefix(Long id) {

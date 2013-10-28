@@ -24,7 +24,8 @@ public abstract class ApiRequest {
 
 	static final Map<String, Class<? extends ApiRequest>> requestNameToClass = ImmutableMap.of(
 			Order.class.getSimpleName(), Order.class,
-			Login.class.getSimpleName(), Login.class);
+			Login.class.getSimpleName(), Login.class,
+			AccountStateRequest.class.getSimpleName(), AccountStateRequest.class);
 
 	static ApiRequest fromJson(String json) throws Exception {
 		JsonFactory jsonFactory = new JsonFactory();
@@ -78,4 +79,10 @@ class Login extends ApiRequest {
 
 	Login withEmail(String email) {this.email = email; return this;}
 	Login withPassword(String password) {this.password = password; return this;}
+}
+
+class AccountStateRequest extends ApiRequest {
+	public String type = this.getClass().getSimpleName();
+	public String session = "default-session-id";
+	AccountStateRequest withSession(String session) {this.session = session; return this;}
 }
