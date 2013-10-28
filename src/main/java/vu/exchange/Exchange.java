@@ -2,8 +2,8 @@ package vu.exchange;
 
 import static java.lang.String.format;
 
-import static vu.exchange.ExchangeDisruptor.multipleProducersSingleConsumer;
-import static vu.exchange.ExchangeDisruptor.singleProducerMultipleConsumers;
+import static vu.exchange.DisruptorWrapper.multipleProducersSingleConsumer;
+import static vu.exchange.DisruptorWrapper.singleProducerMultipleConsumers;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -73,8 +73,8 @@ public class Exchange {
 	}
 
 	private final AppContext appContext;
-	private final ExchangeDisruptor requestSubmitDisruptor;
-	private final ExchangeDisruptor responsePublishDisruptor;
+	private final DisruptorWrapper requestSubmitDisruptor;
+	private final DisruptorWrapper responsePublishDisruptor;
 	private final RequestResponseRepo requestResponseRepo = new RequestResponseRepo();
 	private final ApiServer apiServer;
 

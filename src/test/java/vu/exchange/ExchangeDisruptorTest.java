@@ -19,7 +19,7 @@ public class ExchangeDisruptorTest {
 
 	@Test
 	public void shouldProcessEventsConcurrently() throws Exception {
-		ExchangeDisruptor disruptor = ExchangeDisruptor.multipleProducersSingleConsumer(handler);
+		DisruptorWrapper disruptor = DisruptorWrapper.multipleProducersSingleConsumer(handler);
 		disruptor.start();
 		for (long i = 0; i < 20; i++) {
 			disruptor.process(i);

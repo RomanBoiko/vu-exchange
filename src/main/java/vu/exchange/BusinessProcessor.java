@@ -11,9 +11,9 @@ import com.lmax.disruptor.EventHandler;
 
 public class BusinessProcessor implements EventHandler<ValueEvent>{
 	private final Logger log = Logger.getLogger(this.getClass());
-	private final ExchangeDisruptor eventProcessor;
+	private final DisruptorWrapper eventProcessor;
 
-	BusinessProcessor(ExchangeDisruptor eventProcessor) {
+	BusinessProcessor(DisruptorWrapper eventProcessor) {
 		this.eventProcessor = eventProcessor;
 	}
 

@@ -11,30 +11,30 @@ import com.lmax.disruptor.YieldingWaitStrategy;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
 
-public class ExchangeDisruptor {
+public class DisruptorWrapper {
 	private Disruptor<ValueEvent> disruptor;
 	private ExecutorService exec;
 	private final EventHandler<ValueEvent> handler;
 	private final ProducerType producerType;
 	private final WaitStrategy waitStrategy;
-	private ExchangeDisruptor(EventHandler<ValueEvent> eventHandler, ProducerType producerType, WaitStrategy waitStrategy) {
+	private DisruptorWrapper(EventHandler<ValueEvent> eventHandler, ProducerType producerType, WaitStrategy waitStrategy) {
 		this.handler = eventHandler;
 		this.producerType = producerType;
 		this.waitStrategy = waitStrategy;
 	}
 
-	static ExchangeDisruptor singleProducerMultipleConsumers(EventHandler<ValueEvent> eventHandler) {
+	static DisruptorWrapper singleProducerMultipleConsumers(EventHandler<ValueEvent> eventHandler) {
 		//to test and fine appropriate waiting strategy
-		return new ExchangeDisruptor(eventHandler, ProducerType.SINGLE, new YieldingWaitStrategy());
+		return new DisruptorWrapper(eventHandler, ProducerType.SINGLE, new YieldingWaitStrategy());
 	}
 
-	static ExchangeDisruptor multipleProducersSingleConsumer(EventHandler<ValueEvent> eventHandler) {
+	static DisruptorWrapper multipleProducersSingleConsumer(EventHandler<ValueEvent> eventHandler) {
 		//to test and fine appropriate waiting strategy
-		return new ExchangeDisruptor(eventHandler, ProducerType.MULTI, new YieldingWaitStrategy());
+		return new DisruptorWrapper(eventHandler, ProducerType.MULTI, new YieldingWaitStrategy());
 	}
 
 	@SuppressWarnings("unchecked")
-	ExchangeDisruptor start() {
+	DisruptorWrapper start() {
 		exec = Executors.newSingleThreadExecutor();
 		int ringBufferPreallocatedEventsNumber = 1024;
 		disruptor = new Disruptor<ValueEvent>(ValueEvent.EVENT_FACTORY, ringBufferPreallocatedEventsNumber, exec, producerType, waitStrategy);
