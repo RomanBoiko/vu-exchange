@@ -73,6 +73,7 @@ public class ExchangeTest {
 				response = new String(msg.getLast().getData());
 				msg.destroy();
 				ctx.destroy();
+				ctx.close();
 				return response;
 			}
 		}

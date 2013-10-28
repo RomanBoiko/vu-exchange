@@ -45,6 +45,7 @@ public class ZmqTest {
 				logAction(User.CLIENT, Action.SND, clientId, message);
 			}
 			ctx.destroy();
+			ctx.close();
 		}
 	}
 
@@ -116,6 +117,7 @@ public class ZmqTest {
 
 		Thread.sleep(5 * 1000);
 		ctx.destroy();
+		ctx.close();
 	}
 	static void logAction(User user, Action action, String userId, String message) {
 		System.out.println(String.format("%s %s %s {%s}", user, userId, action, message));
