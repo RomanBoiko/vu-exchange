@@ -31,7 +31,7 @@ public class ExchangeTest {
 	public void shouldStartAndStopServer() throws Exception {
 		Exchange exchange = new Exchange(APP_CONTEXT);
 		exchange.start();
-		String response = sendMessage(TestMessageRepo.BUY_ORDER);
+		String response = sendMessage(new Order().toJson());
 		exchange.stop();
 		assertThat(response, containsString("\"type\":\"OrderSubmitResult\""));
 		assertThat(response, containsString("\"status\":\"ACCEPTED\""));

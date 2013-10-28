@@ -27,9 +27,8 @@ public abstract class ApiRequest {
 		return mapper.readValue(parser, Order.class);
 	}
 
-	public Long id;
-	public String sessionId;
-	public Long client;
+	private Long id = requestId(new Date());
+	public Long id() {return id;}
 
 	ApiRequest withArrivalTimestamp(Date timestamp) {
 		this.id = requestId(timestamp);
@@ -39,15 +38,35 @@ public abstract class ApiRequest {
 	Long timestamp() {
 		return id % SUFFIX_MULTIPLIER;
 	}
+
+	public String toJson() throws Exception {
+		return new ObjectMapper().writeValueAsString(this);
+	}
 }
 
 class Order extends ApiRequest {
 	static enum Position { BUY, SELL }
 	static enum Currency { GBP }
 
-	public Long market;
-	public BigDecimal price;
-	public Currency currency;
-	public BigDecimal quantity;
-	public Position position;
+	public String type = this.getClass().getSimpleName();
+	public String session = "default-session-id";
+	public Long market = 0L;
+	public BigDecimal price = BigDecimal.valueOf(0);
+	public Currency currency = Currency.GBP;
+	public BigDecimal quantity = BigDecimal.valueOf(0);
+	public Position position = Position.BUY;
+
+	Order withPosition(Position position) {this.position = position; return this;}
+	Order withPrice(double price) {this.price = BigDecimal.valueOf(price); return this;}
+	Order withQuantity(double quantity) {this.quantity = BigDecimal.valueOf(quantity); return this;}
+	Order withMarket(long market) {this.market = market; return this;}
+	Order withSession(String session) {this.session = session; return this;}
+}
+
+class Login {
+	public String email = "some@somewhere.com";
+	public String password = "pass";
+
+	Login withEmail(String email) {this.email = email; return this;}
+	Login withPassword(String password) {this.password = password; return this;}
 }

@@ -22,7 +22,7 @@ public class BusinessProcessor implements EventHandler<ValueEvent>{
 		RequestDTO requestDTO = (RequestDTO) event.getValue();
 		log.debug(format("Processing business event: Sequence: %s; ValueEvent: %s", sequence, event.getValue()));
 		Order requestOrder = (Order)requestDTO.request;
-		OrderSubmitResult result = new OrderSubmitResult().withOrderId(requestOrder.id.toString()).withStatus(OrderStatus.ACCEPTED);
+		OrderSubmitResult result = new OrderSubmitResult().withOrderId(requestOrder.id().toString()).withStatus(OrderStatus.ACCEPTED);
 		eventProcessor.process(new ResponseDTO(requestDTO, result));
 		log.debug("Request processed, response sent");
 	}
