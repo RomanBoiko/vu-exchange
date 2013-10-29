@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentMap;
 public class RequestResponseRepo {
 	private ConcurrentMap<UUID, RequestResponsePair> repo = new ConcurrentHashMap<UUID, RequestResponsePair>();
 
-	RequestDTO request(Object request) {
+	RequestDTO request(ApiRequest request) {
 		RequestResponsePair reqRespPair = new RequestResponsePair(request);
 		repo.put(reqRespPair.key, reqRespPair);
 		return new RequestDTO(reqRespPair);
@@ -28,9 +28,9 @@ public class RequestResponseRepo {
 	static class RequestResponsePair {
 		private final UUID key = UUID.randomUUID();
 		private final Object lock = new Object();
-		private final Object request;
+		private final ApiRequest request;
 		ApiResponse response = null;
-		RequestResponsePair(Object request) {
+		RequestResponsePair(ApiRequest request) {
 			this.request = request;
 		}
 	}
@@ -39,7 +39,7 @@ public class RequestResponseRepo {
 		private final UUID key;
 		private final Object lock;
 		private boolean alreadyLocked = false;
-		final Object request;
+		final ApiRequest request;
 		private RequestDTO(RequestResponsePair requestResponsePair) {
 			this.key = requestResponsePair.key;
 			this.request = requestResponsePair.request;

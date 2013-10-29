@@ -2,6 +2,7 @@ package vu.exchange;
 
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
 import java.io.File;
@@ -28,14 +29,28 @@ public class ExchangeTest {
 	}
 
 	@Test
-	public void shouldStartAndStopServer() throws Exception {
-		Exchange exchange = new Exchange(APP_CONTEXT);
-		exchange.start();
-		String response = sendMessage(new Order().toJson());
-		exchange.stop();
-		ApiResponse apiResponse = ApiResponse.fromJson(response);
+	public void shouldAcceptOrders() throws Exception {
+		ApiResponse apiResponse = getE2EExchangeResponse(new Order());
 		assertThat(apiResponse, instanceOf(OrderSubmitResult.class));
 		assertThat(((OrderSubmitResult)apiResponse).status, is(OrderSubmitResult.OrderStatus.ACCEPTED));
+	}
+
+//	@Test
+//	public void shouldLoginUser() throws Exception {
+//		ApiResponse apiResponse = getE2EExchangeResponse(new Login());
+//		assertThat(apiResponse, instanceOf(LoginResult.class));
+//		assertThat(((LoginResult)apiResponse).status, is(LoginResult.LoginStatus.OK));
+//		assertThat(((LoginResult)apiResponse).sessionId, notNullValue());
+//	}
+
+	private ApiResponse getE2EExchangeResponse(ApiRequest request)
+			throws Exception {
+		Exchange exchange = new Exchange(APP_CONTEXT);
+		exchange.start();
+		String response = sendMessage(request.toJson());
+		exchange.stop();
+		ApiResponse apiResponse = ApiResponse.fromJson(response);
+		return apiResponse;
 	}
 	
 	@Test
