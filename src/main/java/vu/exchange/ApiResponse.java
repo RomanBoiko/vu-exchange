@@ -2,17 +2,24 @@ package vu.exchange;
 
 import java.math.BigDecimal;
 
-import org.codehaus.jackson.map.ObjectMapper;
+import com.google.common.collect.ImmutableMap;
 
-public class ApiResponse {
-	private final ObjectMapper objectMapper = new ObjectMapper();
+public abstract class ApiResponse {
+	private static final JsonConverter<ApiResponse> JSON_CONVERTER = new JsonConverter<ApiResponse>(ImmutableMap.of(
+			OrderSubmitResult.class.getSimpleName(), OrderSubmitResult.class,
+			LoginResult.class.getSimpleName(), LoginResult.class,
+			AccountState.class.getSimpleName(), AccountState.class));
 
-	public String toJson(Object response) throws Exception {
-		return objectMapper.writeValueAsString(response);
+	static ApiResponse fromJson(String json) throws Exception {
+		return JSON_CONVERTER.fromJson(json);
+	}
+
+	public String toJson() throws Exception {
+		return JSON_CONVERTER.toJson(this);
 	}
 }
 
-class OrderSubmitResult {
+class OrderSubmitResult extends ApiResponse {
 	enum OrderStatus {
 		ACCEPTED, REJECTED;
 	}
@@ -24,7 +31,7 @@ class OrderSubmitResult {
 }
 
 
-class LoginResult {
+class LoginResult extends ApiResponse {
 	enum LoginStatus {
 		OK, NO_SUCH_USER, WRONG_PASSWORD, ALREADY_LOGGED_IN
 	}
@@ -35,7 +42,7 @@ class LoginResult {
 	LoginResult withStatus(LoginStatus status) {this.status = status; return this;}
 }
 
-class AccountState {
+class AccountState extends ApiResponse {
 	public String type = this.getClass().getSimpleName();
 	public BigDecimal amount;
 	public BigDecimal exposure;

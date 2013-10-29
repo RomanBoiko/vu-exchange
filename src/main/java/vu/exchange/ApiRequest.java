@@ -2,11 +2,7 @@ package vu.exchange;
 
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.Map;
 import java.util.Random;
-
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.map.ObjectMapper;
 
 import com.google.common.collect.ImmutableMap;
 
@@ -22,18 +18,17 @@ public abstract class ApiRequest {
 		return (new Random().nextInt(ID_PREFIX_LIMIT) * SUFFIX_MULTIPLIER) + timestamp.getTime();
 	}
 
-	static final Map<String, Class<? extends ApiRequest>> requestNameToClass = ImmutableMap.of(
+	private static final JsonConverter<ApiRequest> JSON_CONVERTER = new JsonConverter<ApiRequest>(ImmutableMap.of(
 			Order.class.getSimpleName(), Order.class,
 			Login.class.getSimpleName(), Login.class,
-			AccountStateRequest.class.getSimpleName(), AccountStateRequest.class);
+			AccountStateRequest.class.getSimpleName(), AccountStateRequest.class));
 
 	static ApiRequest fromJson(String json) throws Exception {
-		JsonFactory jsonFactory = new JsonFactory();
-		ObjectMapper mapper = new ObjectMapper();
-		return mapper.readValue(
-				jsonFactory.createJsonParser(json),
-				requestNameToClass.get(
-						mapper.readTree(jsonFactory.createJsonParser(json)).get("type").getTextValue()));
+		return JSON_CONVERTER.fromJson(json);
+	}
+
+	public String toJson() throws Exception {
+		return JSON_CONVERTER.toJson(this);
 	}
 
 	private Long id = requestId(new Date());
@@ -46,10 +41,6 @@ public abstract class ApiRequest {
 
 	Long timestamp() {
 		return id % SUFFIX_MULTIPLIER;
-	}
-
-	public String toJson() throws Exception {
-		return new ObjectMapper().writeValueAsString(this);
 	}
 }
 

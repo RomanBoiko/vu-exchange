@@ -21,7 +21,7 @@ public class RequestResponseRepo {
 		}
 	}
 
-	Object getResponse(RequestDTO requestDTO) {
+	ApiResponse getResponse(RequestDTO requestDTO) {
 		return repo.remove(requestDTO.key).response;
 	}
 
@@ -29,7 +29,7 @@ public class RequestResponseRepo {
 		private final UUID key = UUID.randomUUID();
 		private final Object lock = new Object();
 		private final Object request;
-		Object response = null;
+		ApiResponse response = null;
 		RequestResponsePair(Object request) {
 			this.request = request;
 		}
@@ -59,8 +59,8 @@ public class RequestResponseRepo {
 
 	static class ResponseDTO {
 		final UUID key;
-		final Object response;
-		public ResponseDTO(RequestDTO request, Object response) {
+		final ApiResponse response;
+		public ResponseDTO(RequestDTO request, ApiResponse response) {
 			this.key = request.key;
 			this.response = response;
 		}

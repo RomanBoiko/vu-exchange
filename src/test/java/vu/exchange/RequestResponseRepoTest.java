@@ -36,7 +36,7 @@ public class RequestResponseRepoTest {
 			Thread.sleep(10);
 			requestDto.waitForResponse();
 		} finally {
-			Object response = new Object();
+			ApiResponse response = new LoginResult();
 			repo.respond(new ResponseDTO(requestDto, response));
 			thread.join();
 		}
@@ -46,7 +46,7 @@ public class RequestResponseRepoTest {
 	public void shouldBeAbleToProceedExecutionAfterRespondMethodCalledAndMakeResponseAvailableStraightAway() throws Exception {
 		final RequestResponseRepo repo = new RequestResponseRepo();
 		final Object request = new Object();
-		final Object response = new Object();
+		final ApiResponse response = new LoginResult();
 		final RequestDTO requestDto = repo.request(request);
 		final Thread thread = new Thread(new Runnable() {
 			public void run() {
