@@ -2,20 +2,16 @@ package vu.exchange;
 
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
 import java.io.File;
+import java.io.IOException;
 
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
-import org.zeromq.ZContext;
-import org.zeromq.ZMQ;
-import org.zeromq.ZMQ.PollItem;
-import org.zeromq.ZMQ.Poller;
-import org.zeromq.ZMQ.Socket;
-import org.zeromq.ZMsg;
-
+import org.xsocket.connection.BlockingConnection;
+import org.xsocket.connection.IBlockingConnection;
 
 public class ExchangeTest {
 
@@ -35,13 +31,13 @@ public class ExchangeTest {
 		assertThat(((OrderSubmitResult)apiResponse).status, is(OrderSubmitResult.OrderStatus.ACCEPTED));
 	}
 
-//	@Test
-//	public void shouldLoginUser() throws Exception {
-//		ApiResponse apiResponse = getE2EExchangeResponse(new Login());
-//		assertThat(apiResponse, instanceOf(LoginResult.class));
-//		assertThat(((LoginResult)apiResponse).status, is(LoginResult.LoginStatus.OK));
-//		assertThat(((LoginResult)apiResponse).sessionId, notNullValue());
-//	}
+	@Test
+	public void shouldLoginUser() throws Exception {
+		ApiResponse apiResponse = getE2EExchangeResponse(new Login());
+		assertThat(apiResponse, instanceOf(LoginResult.class));
+		assertThat(((LoginResult)apiResponse).status, is(LoginResult.LoginStatus.OK));
+		assertThat(((LoginResult)apiResponse).sessionId, Matchers.notNullValue());
+	}
 
 	private ApiResponse getE2EExchangeResponse(ApiRequest request)
 			throws Exception {
@@ -71,33 +67,13 @@ public class ExchangeTest {
 		assertThat(APP_CONTEXT.appPidFile().exists(), is(false));
 	}
 
-	private String sendMessage(String message) {
-		ZContext ctx = new ZContext();
-		Socket client = ctx.createSocket(ZMQ.DEALER);
-
-		String clientId = String.format("c111");
-		client.setIdentity(clientId.getBytes());
-		client.connect(String.format("tcp://localhost:%s", APP_CONTEXT.apiTcpPort()));
-		client.send(message, 0);
-
-		PollItem[] items = new PollItem[] { new PollItem(client, Poller.POLLIN) };
-		String response = null;
-		while (true) {
-			ZMQ.poll(items, 10);
-			if (items[0].isReadable()) {
-				ZMsg msg = ZMsg.recvMsg(client);
-				logAction("CLIENT", "RCV", clientId, new String(msg.getLast().getData()));
-				response = new String(msg.getLast().getData());
-				msg.destroy();
-				ctx.destroy();
-				ctx.close();
-				return response;
-			}
-		}
-	}
-
-	static void logAction(String user, String action, String userId, String message) {
-		System.out.println(String.format("%s %s %s {%s}", user, userId, action, message));
+	private String sendMessage(String request) throws IOException {
+		IBlockingConnection bc = new BlockingConnection("localhost", APP_CONTEXT.apiTcpPort());
+		bc.write(request + "\n");
+		String response = bc.readStringByDelimiter("\n");
+		System.out.println(String.format("%s %s {%s}", "CLIENT", "RCV", response));
+		bc.close();
+		return response;
 	}
 
 }

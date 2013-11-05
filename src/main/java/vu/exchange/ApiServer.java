@@ -2,37 +2,35 @@ package vu.exchange;
 
 import static java.lang.String.format;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.io.IOException;
+import java.nio.BufferUnderflowException;
+import java.nio.channels.ClosedChannelException;
 
 import org.apache.log4j.Logger;
-import org.zeromq.ZContext;
-import org.zeromq.ZFrame;
-import org.zeromq.ZMQ;
-import org.zeromq.ZMQ.Socket;
-import org.zeromq.ZMsg;
+import org.xsocket.MaxReadSizeExceededException;
+import org.xsocket.connection.IConnectHandler;
+import org.xsocket.connection.IDataHandler;
+import org.xsocket.connection.INonBlockingConnection;
+import org.xsocket.connection.IServer;
+import org.xsocket.connection.Server;
 
 import vu.exchange.RequestHandler.RequestHandlerFactory;
 
-public class ApiServer implements Runnable {
-	private static final String API_URL_TEMPLATE = "tcp://*:%s";
-	private static final String WORKERS_URL = "inproc://backend";
+public class ApiServer {
 
 	private final Logger log = Logger.getLogger(this.getClass());
 	private RequestHandlerFactory requestHandlerFactory;
-	private ZContext context;
 	private int port = 5555;
 	private int workersNumber = 1;
-	private Thread serverThread = new Thread(this);
-	private ExecutorService workersExecutorService;
-
+	private IServer ioServer;
 
 	public ApiServer withApiPort(int port) {
 		this.port = port;
 		return this;
 	}
 
-	public ApiServer withRequestHandlerFactory(RequestHandlerFactory requestHandlerFactory) {
+	public ApiServer withRequestHandlerFactory(
+			RequestHandlerFactory requestHandlerFactory) {
 		this.requestHandlerFactory = requestHandlerFactory;
 		return this;
 	}
@@ -44,48 +42,31 @@ public class ApiServer implements Runnable {
 
 	public ApiServer start() {
 		log.info("Starting ApiServer");
-		serverThread.start();
+		try {
+			ioServer = new Server(port, new ApiRequestHandler(requestHandlerFactory.createHandler()), 1, workersNumber);
+			ioServer.start();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 		log.info("ApiServer started");
 		return this;
 	}
 
 	void stop() throws Exception {
 		log.info("Stopping ApiServer");
-		workersExecutorService.shutdown();
-		log.info("External workers stopped");
-		serverThread.interrupt();
+		ioServer.close();
 		log.info("ApiServer stopped");
 	}
 
-	public void run() {
-		context = new ZContext();
-		Socket frontend = context.createSocket(ZMQ.ROUTER);
-		frontend.bind(format(API_URL_TEMPLATE, port));
-		
-		Socket backend = context.createSocket(ZMQ.DEALER);
-		backend.bind(WORKERS_URL);
-		
-		workersExecutorService = Executors.newFixedThreadPool(workersNumber);
-		for (int threadNbr = 0; threadNbr < workersNumber; threadNbr++) {
-			workersExecutorService.submit(new Worker(context, requestHandlerFactory.createHandler()));
-		}
-		log.info("External workers started");
-		ZMQ.proxy(frontend, backend, null);
-	}
-
-	static class Worker implements Runnable {
-
-		private static int workerSequence = 0;
-
-		private final ZContext ctx;
+	class ApiRequestHandler implements IConnectHandler, IDataHandler {
+		private static final String DELIMITER = "\n";
 		private final Logger log = Logger.getLogger(this.getClass());
 		private final RequestHandler requestHandler;
 
-		public Worker(ZContext ctx, RequestHandler requestHandler) {
-			this.ctx = ctx;
+		public ApiRequestHandler(RequestHandler requestHandler) {
 			this.requestHandler = requestHandler;
 		}
-	
+		
 		private String getResponse(String request) {
 			try {
 				return requestHandler.getResponseMessage(request);
@@ -95,28 +76,24 @@ public class ApiServer implements Runnable {
 			}
 		}
 
-		public void run() {
-			Socket worker = ctx.createSocket(ZMQ.DEALER);
-			worker.connect(WORKERS_URL);
-			String workerId = "w" + ++workerSequence;
-			while (!Thread.currentThread().isInterrupted()) {
-				ZMsg msg = ZMsg.recvMsg(worker);
-				ZFrame address = msg.pop();
-				ZFrame content = msg.pop();
-				assert (content != null);
-				String request = new String(content.getData());
-				log.debug(format("Request received by worker %s: %s", workerId, request));
-				msg.destroy();
-				address.send(worker, ZFrame.REUSE + ZFrame.MORE);
-				String responseMsg = getResponse(request);
-				log.debug(format("Reply sent by worker %s: %s", workerId, responseMsg));
-				ZFrame response = new ZFrame(responseMsg);
-				response.send(worker, ZFrame.REUSE);
-				response.destroy();
-				address.destroy();
-				content.destroy();
-			}
-			ctx.destroy();
+		@Override
+		public boolean onData(INonBlockingConnection connection)
+				throws IOException, BufferUnderflowException,
+				ClosedChannelException, MaxReadSizeExceededException {
+			String request = connection.readStringByDelimiter(DELIMITER);
+			log.debug(format("Request received by worker: %s", request));
+			String responseMsg = getResponse(request);
+			log.debug(format("Reply sent by worker: %s", responseMsg));
+			connection.write(responseMsg + DELIMITER);
+			return true;
 		}
+
+		@Override
+		public boolean onConnect(INonBlockingConnection connection)
+				throws IOException, BufferUnderflowException,
+				MaxReadSizeExceededException {
+			return true;
+		}
+
 	}
 }
