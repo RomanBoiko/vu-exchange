@@ -4,13 +4,13 @@ import java.math.BigDecimal;
 
 import com.google.common.collect.ImmutableMap;
 
-public abstract class ApiResponse {
-	private static final JsonConverter<ApiResponse> JSON_CONVERTER = new JsonConverter<ApiResponse>(ImmutableMap.of(
+public abstract class Response {
+	private static final JsonConverter<Response> JSON_CONVERTER = new JsonConverter<Response>(ImmutableMap.of(
 			OrderSubmitResult.class.getSimpleName(), OrderSubmitResult.class,
 			LoginResult.class.getSimpleName(), LoginResult.class,
 			AccountState.class.getSimpleName(), AccountState.class));
 
-	static ApiResponse fromJson(String json) throws Exception {
+	static Response fromJson(String json) throws Exception {
 		return JSON_CONVERTER.fromJson(json);
 	}
 
@@ -19,7 +19,7 @@ public abstract class ApiResponse {
 	}
 }
 
-class OrderSubmitResult extends ApiResponse {
+class OrderSubmitResult extends Response {
 	enum OrderStatus {
 		ACCEPTED, REJECTED;
 	}
@@ -31,7 +31,7 @@ class OrderSubmitResult extends ApiResponse {
 }
 
 
-class LoginResult extends ApiResponse {
+class LoginResult extends Response {
 	enum LoginStatus {
 		OK, NO_SUCH_USER, WRONG_PASSWORD, ALREADY_LOGGED_IN
 	}
@@ -42,7 +42,7 @@ class LoginResult extends ApiResponse {
 	LoginResult withStatus(LoginStatus status) {this.status = status; return this;}
 }
 
-class AccountState extends ApiResponse {
+class AccountState extends Response {
 	public String type = this.getClass().getSimpleName();
 	public BigDecimal amount;
 	public BigDecimal exposure;

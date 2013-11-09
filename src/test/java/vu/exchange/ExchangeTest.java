@@ -26,26 +26,26 @@ public class ExchangeTest {
 
 	@Test
 	public void shouldAcceptOrders() throws Exception {
-		ApiResponse apiResponse = getE2EExchangeResponse(new Order());
+		Response apiResponse = getE2EExchangeResponse(new Order());
 		assertThat(apiResponse, instanceOf(OrderSubmitResult.class));
 		assertThat(((OrderSubmitResult)apiResponse).status, is(OrderSubmitResult.OrderStatus.ACCEPTED));
 	}
 
 	@Test
 	public void shouldLoginUser() throws Exception {
-		ApiResponse apiResponse = getE2EExchangeResponse(new Login());
+		Response apiResponse = getE2EExchangeResponse(new Login().withEmail("user1@smarkets.com").withPassword("pass1"));
 		assertThat(apiResponse, instanceOf(LoginResult.class));
 		assertThat(((LoginResult)apiResponse).status, is(LoginResult.LoginStatus.OK));
 		assertThat(((LoginResult)apiResponse).sessionId, Matchers.notNullValue());
 	}
 
-	private ApiResponse getE2EExchangeResponse(ApiRequest request)
+	private Response getE2EExchangeResponse(Request request)
 			throws Exception {
 		Exchange exchange = new Exchange(APP_CONTEXT);
 		exchange.start();
 		String response = sendMessage(request.toJson());
 		exchange.stop();
-		ApiResponse apiResponse = ApiResponse.fromJson(response);
+		Response apiResponse = Response.fromJson(response);
 		return apiResponse;
 	}
 	

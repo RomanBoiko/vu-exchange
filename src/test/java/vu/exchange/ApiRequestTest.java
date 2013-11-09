@@ -42,7 +42,7 @@ public class ApiRequestTest {
 
 	@Test
 	public void shouldDeserializeOrder() throws Exception {
-		Order order = (Order)ApiRequest.fromJson(ORDER);
+		Order order = (Order)Request.fromJson(ORDER);
 		assertThat(order.market, is(1L));
 		assertThat(order.price, is(BigDecimal.valueOf(1.1)));
 		assertThat(order.currency, is(Currency.GBP));
@@ -59,7 +59,7 @@ public class ApiRequestTest {
 
 	@Test
 	public void shouldDeserializeLogin() throws Exception {
-		Login login = (Login)ApiRequest.fromJson(LOGIN);
+		Login login = (Login)Request.fromJson(LOGIN);
 		assertThat(login.email, is("email@email.com"));
 		assertThat(login.password, is("pass"));
 	}
@@ -71,7 +71,7 @@ public class ApiRequestTest {
 
 	@Test
 	public void shouldDeserializeAccountStateRequest() throws Exception {
-		AccountStateRequest accountRequest = (AccountStateRequest)ApiRequest.fromJson(ACCOUNT_STATE_REQUEST);
+		AccountStateRequest accountRequest = (AccountStateRequest)Request.fromJson(ACCOUNT_STATE_REQUEST);
 		assertThat(accountRequest.session, is("sessionId"));
 	}
 

@@ -6,7 +6,7 @@ import java.util.Random;
 
 import com.google.common.collect.ImmutableMap;
 
-public abstract class ApiRequest {
+public abstract class Request {
 	static final int ID_MAX_PREFIX_LENGTH = 5;
 	static final Integer ID_PREFIX_LIMIT = Math.power(10L, ID_MAX_PREFIX_LENGTH).intValue();
 	
@@ -18,12 +18,12 @@ public abstract class ApiRequest {
 		return (new Random().nextInt(ID_PREFIX_LIMIT) * SUFFIX_MULTIPLIER) + timestamp.getTime();
 	}
 
-	private static final JsonConverter<ApiRequest> JSON_CONVERTER = new JsonConverter<ApiRequest>(ImmutableMap.of(
+	private static final JsonConverter<Request> JSON_CONVERTER = new JsonConverter<Request>(ImmutableMap.of(
 			Order.class.getSimpleName(), Order.class,
 			Login.class.getSimpleName(), Login.class,
 			AccountStateRequest.class.getSimpleName(), AccountStateRequest.class));
 
-	static ApiRequest fromJson(String json) throws Exception {
+	static Request fromJson(String json) throws Exception {
 		return JSON_CONVERTER.fromJson(json);
 	}
 
@@ -34,7 +34,7 @@ public abstract class ApiRequest {
 	private Long id = requestId(new Date());
 	public Long id() {return id;}
 
-	ApiRequest withArrivalTimestamp(Date timestamp) {
+	Request withArrivalTimestamp(Date timestamp) {
 		this.id = requestId(timestamp);
 		return this;
 	}
@@ -44,7 +44,7 @@ public abstract class ApiRequest {
 	}
 }
 
-class Order extends ApiRequest {
+class Order extends Request {
 	static enum Position { BUY, SELL }
 	static enum Currency { GBP }
 
@@ -63,7 +63,7 @@ class Order extends ApiRequest {
 	Order withSession(String session) {this.session = session; return this;}
 }
 
-class Login extends ApiRequest {
+class Login extends Request {
 	public String type = this.getClass().getSimpleName();
 	public String email = "some@somewhere.com";
 	public String password = "pass";
@@ -72,7 +72,7 @@ class Login extends ApiRequest {
 	Login withPassword(String password) {this.password = password; return this;}
 }
 
-class AccountStateRequest extends ApiRequest {
+class AccountStateRequest extends Request {
 	public String type = this.getClass().getSimpleName();
 	public String session = "default-session-id";
 	AccountStateRequest withSession(String session) {this.session = session; return this;}

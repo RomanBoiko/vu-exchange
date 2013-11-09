@@ -21,10 +21,10 @@ class RequestHandler {
 
 	private final File incomingEventsFile;
 	private final DateFormat dateFormat = new SimpleDateFormat(INPUT_DATE_FORMAT);
-	private final DisruptorWrapper eventProcessor;
+	private final DisruptorBridge eventProcessor;
 	private final RequestResponseRepo requestResponseRepo;
 
-	private RequestHandler(RequestResponseRepo requestResponseRepo, File incomingEventsFile, DisruptorWrapper eventProcessor) {
+	private RequestHandler(RequestResponseRepo requestResponseRepo, File incomingEventsFile, DisruptorBridge eventProcessor) {
 		this.incomingEventsFile = incomingEventsFile;
 		this.eventProcessor = eventProcessor;
 		this.requestResponseRepo = requestResponseRepo;
@@ -33,7 +33,7 @@ class RequestHandler {
 	String getResponseMessage(String requestMessage) throws Exception {
 		Date arrivalTime = new Date(System.currentTimeMillis());
 		log.debug("Request received: " + requestMessage);
-		ApiRequest apiRequest = ApiRequest.fromJson(requestMessage);
+		Request apiRequest = Request.fromJson(requestMessage);
 		apiRequest.withArrivalTimestamp(arrivalTime);
 		persistIncomingEvent(arrivalTime, requestMessage);
 		log.debug("Request persisted");
@@ -51,9 +51,9 @@ class RequestHandler {
 	static class RequestHandlerFactory {
 		private final RequestResponseRepo requestResponseRepo;
 		private final File incomingEventsFile;
-		private final DisruptorWrapper eventProcessor;
+		private final DisruptorBridge eventProcessor;
 
-		RequestHandlerFactory(RequestResponseRepo repo, File eventsFile, DisruptorWrapper eventProcessor) {
+		RequestHandlerFactory(RequestResponseRepo repo, File eventsFile, DisruptorBridge eventProcessor) {
 			this.requestResponseRepo = repo;
 			this.incomingEventsFile = eventsFile;
 			this.eventProcessor = eventProcessor;

@@ -19,7 +19,7 @@ public class RequestResponseRepoTest {
 		exception.expect(IllegalStateException.class);
 		exception.expectMessage("Request already locked [can be locked only once]");
 		RequestResponseRepo repo = new RequestResponseRepo();
-		final ApiRequest request = new Login();
+		final Request request = new Login();
 		final RequestDTO requestDto = repo.request(request);
 		Thread thread = new Thread(new Runnable() {
 			@Override
@@ -36,7 +36,7 @@ public class RequestResponseRepoTest {
 			Thread.sleep(10);
 			requestDto.waitForResponse();
 		} finally {
-			ApiResponse response = new LoginResult();
+			Response response = new LoginResult();
 			repo.respond(new ResponseDTO(requestDto, response));
 			thread.join();
 		}
@@ -45,8 +45,8 @@ public class RequestResponseRepoTest {
 	@Test
 	public void shouldBeAbleToProceedExecutionAfterRespondMethodCalledAndMakeResponseAvailableStraightAway() throws Exception {
 		final RequestResponseRepo repo = new RequestResponseRepo();
-		final ApiRequest request = new Login();
-		final ApiResponse response = new LoginResult();
+		final Request request = new Login();
+		final Response response = new LoginResult();
 		final RequestDTO requestDto = repo.request(request);
 		final Thread thread = new Thread(new Runnable() {
 			public void run() {

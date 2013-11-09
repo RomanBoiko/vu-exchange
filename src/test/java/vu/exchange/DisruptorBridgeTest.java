@@ -12,14 +12,14 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.lmax.disruptor.EventHandler;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ExchangeDisruptorTest {
+public class DisruptorBridgeTest {
 
 	@Mock
 	private EventHandler<ValueEvent> handler;
 
 	@Test
 	public void shouldProcessEventsConcurrently() throws Exception {
-		DisruptorWrapper disruptor = DisruptorWrapper.multipleProducersSingleConsumer(handler);
+		DisruptorBridge disruptor = DisruptorBridge.multipleProducersSingleConsumer(handler);
 		disruptor.start();
 		for (long i = 0; i < 20; i++) {
 			disruptor.process(i);

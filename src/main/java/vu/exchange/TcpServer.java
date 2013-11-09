@@ -8,7 +8,7 @@ import java.nio.channels.ClosedChannelException;
 
 import org.apache.log4j.Logger;
 import org.xsocket.MaxReadSizeExceededException;
-import org.xsocket.connection.IConnectHandler;
+import org.xsocket.connection.IConnectionScoped;
 import org.xsocket.connection.IDataHandler;
 import org.xsocket.connection.INonBlockingConnection;
 import org.xsocket.connection.IServer;
@@ -16,7 +16,7 @@ import org.xsocket.connection.Server;
 
 import vu.exchange.RequestHandler.RequestHandlerFactory;
 
-public class ApiServer {
+public class TcpServer {
 
 	private final Logger log = Logger.getLogger(this.getClass());
 	private RequestHandlerFactory requestHandlerFactory;
@@ -24,26 +24,25 @@ public class ApiServer {
 	private int workersNumber = 1;
 	private IServer ioServer;
 
-	public ApiServer withApiPort(int port) {
+	public TcpServer withPort(int port) {
 		this.port = port;
 		return this;
 	}
 
-	public ApiServer withRequestHandlerFactory(
-			RequestHandlerFactory requestHandlerFactory) {
+	public TcpServer withRequestHandlerFactory(RequestHandlerFactory requestHandlerFactory) {
 		this.requestHandlerFactory = requestHandlerFactory;
 		return this;
 	}
 
-	public ApiServer withNumberOfWorkers(int workersNumber) {
+	public TcpServer withNumberOfWorkers(int workersNumber) {
 		this.workersNumber = workersNumber;
 		return this;
 	}
 
-	public ApiServer start() {
+	public TcpServer start() {
 		log.info("Starting ApiServer");
 		try {
-			ioServer = new Server(port, new ApiRequestHandler(requestHandlerFactory.createHandler()), 1, workersNumber);
+			ioServer = new Server(port, new ApiRequestHandler(requestHandlerFactory), 1, workersNumber);
 			ioServer.start();
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -58,13 +57,15 @@ public class ApiServer {
 		log.info("ApiServer stopped");
 	}
 
-	class ApiRequestHandler implements IConnectHandler, IDataHandler {
+	class ApiRequestHandler implements IDataHandler, IConnectionScoped {
 		private static final String DELIMITER = "\n";
 		private final Logger log = Logger.getLogger(this.getClass());
+		private final RequestHandlerFactory requestHandlerFactory;
 		private final RequestHandler requestHandler;
 
-		public ApiRequestHandler(RequestHandler requestHandler) {
-			this.requestHandler = requestHandler;
+		public ApiRequestHandler(RequestHandlerFactory requestHandlerFactory) {
+			this.requestHandlerFactory = requestHandlerFactory;
+			this.requestHandler = requestHandlerFactory.createHandler();
 		}
 		
 		private String getResponse(String request) {
@@ -88,12 +89,8 @@ public class ApiServer {
 			return true;
 		}
 
-		@Override
-		public boolean onConnect(INonBlockingConnection connection)
-				throws IOException, BufferUnderflowException,
-				MaxReadSizeExceededException {
-			return true;
+		public Object clone() throws java.lang.CloneNotSupportedException {
+			return new ApiRequestHandler(requestHandlerFactory);
 		}
-
 	}
 }

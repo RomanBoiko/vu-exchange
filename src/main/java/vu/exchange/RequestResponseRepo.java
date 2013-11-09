@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentMap;
 public class RequestResponseRepo {
 	private ConcurrentMap<UUID, RequestResponsePair> repo = new ConcurrentHashMap<UUID, RequestResponsePair>();
 
-	RequestDTO request(ApiRequest request) {
+	RequestDTO request(Request request) {
 		RequestResponsePair reqRespPair = new RequestResponsePair(request);
 		repo.put(reqRespPair.key, reqRespPair);
 		return new RequestDTO(reqRespPair);
@@ -21,16 +21,16 @@ public class RequestResponseRepo {
 		}
 	}
 
-	ApiResponse getResponse(RequestDTO requestDTO) {
+	Response getResponse(RequestDTO requestDTO) {
 		return repo.remove(requestDTO.key).response;
 	}
 
 	static class RequestResponsePair {
 		private final UUID key = UUID.randomUUID();
 		private final Object lock = new Object();
-		private final ApiRequest request;
-		ApiResponse response = null;
-		RequestResponsePair(ApiRequest request) {
+		private final Request request;
+		Response response = null;
+		RequestResponsePair(Request request) {
 			this.request = request;
 		}
 	}
@@ -39,8 +39,8 @@ public class RequestResponseRepo {
 		private final UUID key;
 		private final Object lock;
 		private boolean alreadyLocked = false;
-		final ApiRequest request;
-		private RequestDTO(RequestResponsePair requestResponsePair) {
+		final Request request;
+		RequestDTO(RequestResponsePair requestResponsePair) {
 			this.key = requestResponsePair.key;
 			this.request = requestResponsePair.request;
 			this.lock = requestResponsePair.lock;
@@ -59,8 +59,8 @@ public class RequestResponseRepo {
 
 	static class ResponseDTO {
 		final UUID key;
-		final ApiResponse response;
-		public ResponseDTO(RequestDTO request, ApiResponse response) {
+		final Response response;
+		ResponseDTO(RequestDTO request, Response response) {
 			this.key = request.key;
 			this.response = response;
 		}

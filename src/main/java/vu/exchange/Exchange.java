@@ -2,8 +2,8 @@ package vu.exchange;
 
 import static java.lang.String.format;
 
-import static vu.exchange.DisruptorWrapper.multipleProducersSingleConsumer;
-import static vu.exchange.DisruptorWrapper.singleProducerMultipleConsumers;
+import static vu.exchange.DisruptorBridge.multipleProducersSingleConsumer;
+import static vu.exchange.DisruptorBridge.singleProducerMultipleConsumers;
 
 import java.io.File;
 import java.lang.management.ManagementFactory;
@@ -36,19 +36,17 @@ public class Exchange {
 
 	private final Logger log = Logger.getLogger(Exchange.class);
 	private final AppContext appContext;
-	private final DisruptorWrapper requestSubmitDisruptor;
-	private final DisruptorWrapper responsePublishDisruptor;
+	private final DisruptorBridge requestSubmitDisruptor;
+	private final DisruptorBridge responsePublishDisruptor;
 	private final RequestResponseRepo requestResponseRepo = new RequestResponseRepo();
-	private final ApiServer apiServer;
+	private final TcpServer tcpServer;
 
 	Exchange(AppContext context) throws Exception {
 		this.appContext = context;
-		this.responsePublishDisruptor = singleProducerMultipleConsumers(
-				new ResponsePublisher(requestResponseRepo));
-		this.requestSubmitDisruptor = multipleProducersSingleConsumer(
-				new BusinessProcessor(responsePublishDisruptor));
-		this.apiServer = new ApiServer()
-					.withApiPort(appContext.apiTcpPort())
+		this.responsePublishDisruptor = singleProducerMultipleConsumers(new ResponsePublisher(requestResponseRepo));
+		this.requestSubmitDisruptor = multipleProducersSingleConsumer(new BusinessProcessor(responsePublishDisruptor));
+		this.tcpServer = new TcpServer()
+					.withPort(appContext.apiTcpPort())
 					.withNumberOfWorkers(context.inputReceiversCount())
 					.withRequestHandlerFactory(
 							new RequestHandlerFactory(
@@ -69,13 +67,13 @@ public class Exchange {
 	Exchange start() {
 		responsePublishDisruptor.start();
 		requestSubmitDisruptor.start();
-		apiServer.start();
+		tcpServer.start();
 		return this;
 	}
 
 	void stop() throws Exception {
 		log.info("Stopping exchange");
-		apiServer.stop();
+		tcpServer.stop();
 		log.info("External API server stopped");
 		requestSubmitDisruptor.stop();
 		log.info("Request disruptor stopped");
