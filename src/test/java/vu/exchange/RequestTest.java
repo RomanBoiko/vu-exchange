@@ -14,11 +14,16 @@ import org.junit.Test;
 import vu.exchange.Order.Currency;
 import vu.exchange.Order.Position;
 
-public class ApiRequestTest {
+public class RequestTest {
 
 	private static final String ORDER = "{\"sessionId\":\"sessionId\",\"type\":\"Order\",\"marketId\":1,\"price\":1.1,\"currency\":\"GBP\",\"quantity\":1.2,\"position\":\"SELL\"}";
 	private static final String LOGIN = "{\"type\":\"Login\",\"email\":\"email@email.com\",\"password\":\"pass\"}";
 	private static final String ACCOUNT_STATE_REQUEST = "{\"sessionId\":\"sessionId\",\"type\":\"AccountStateRequest\"}";
+	private static final String MARKETS_REQUEST = "{\"sessionId\":\"sessionId\",\"type\":\"MarketsRequest\"}";
+	private static final String MARKET_PRICES_REQUEST = "{\"sessionId\":\"sessionId\",\"type\":\"MarketPricesRequest\",\"marketId\":111}";
+	private static final String MARKET_REGISTRATION_REQUEST = "{\"id\":111,\"sessionId\":\"sessionId\",\"type\":\"MarketRegistrationRequest\",\"name\":\"mname\"}";
+	private static final String USER_REGISTRATION_REQUEST = "{\"sessionId\":\"sessionId\",\"type\":\"UserRegistrationRequest\",\"email\":\"email@com\",\"password\":\"secret\"}";
+	
 
 	@Test
 	public void shouldGenerateOrderWithTimestampAsPartOfUniqueId() {
@@ -73,6 +78,46 @@ public class ApiRequestTest {
 	public void shouldDeserializeAccountStateRequest() throws Exception {
 		AccountStateRequest accountRequest = (AccountStateRequest)Request.fromJson(ACCOUNT_STATE_REQUEST);
 		assertThat(accountRequest.sessionId, is("sessionId"));
+	}
+	
+	@Test
+	public void shouldSerializeMarketsRequest() throws Exception {
+		assertThat(new MarketsRequest().withSessionId("sessionId").toJson(), is(MARKETS_REQUEST));
+	}
+
+	@Test
+	public void shouldDeserializeMarketsRequest() throws Exception {
+		assertThat(((MarketsRequest)Request.fromJson(MARKETS_REQUEST)).sessionId, is("sessionId"));
+	}
+	
+	@Test
+	public void shouldSerializeMarketPricesRequest() throws Exception {
+		assertThat(new MarketPricesRequest().withMarketId(111L).withSessionId("sessionId").toJson(), is(MARKET_PRICES_REQUEST));
+	}
+
+	@Test
+	public void shouldDeserializeMarketPricesRequest() throws Exception {
+		assertThat(((MarketPricesRequest)Request.fromJson(MARKET_PRICES_REQUEST)).marketId, is(111L));
+	}
+
+	@Test
+	public void shouldSerializeMarketDetails() throws Exception {
+		assertThat(new MarketRegistrationRequest().withId(111L).withName("mname").withSessionId("sessionId").toJson(), is(MARKET_REGISTRATION_REQUEST));
+	}
+
+	@Test
+	public void shouldDeserializeMarketDetails() throws Exception {
+		assertThat(((MarketRegistrationRequest)Request.fromJson(MARKET_REGISTRATION_REQUEST)).name, is("mname"));
+	}
+
+	@Test
+	public void shouldSerializeUserRegistrationRequest() throws Exception {
+		assertThat(new UserRegistrationRequest().withEmail("email@com").withPassword("secret").withSessionId("sessionId").toJson(), is(USER_REGISTRATION_REQUEST));
+	}
+
+	@Test
+	public void shouldDeserializeUserRegistrationRequest() throws Exception {
+		assertThat(((UserRegistrationRequest)Request.fromJson(USER_REGISTRATION_REQUEST)).email, is("email@com"));
 	}
 
 	private String idPrefix(Long id) {

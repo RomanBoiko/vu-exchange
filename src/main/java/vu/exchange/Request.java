@@ -18,10 +18,15 @@ public abstract class Request {
 		return (new Random().nextInt(ID_PREFIX_LIMIT) * SUFFIX_MULTIPLIER) + timestamp.getTime();
 	}
 
-	private static final JsonConverter<Request> JSON_CONVERTER = new JsonConverter<Request>(ImmutableMap.of(
-			Order.class.getSimpleName(), Order.class,
-			Login.class.getSimpleName(), Login.class,
-			AccountStateRequest.class.getSimpleName(), AccountStateRequest.class));
+	private static final JsonConverter<Request> JSON_CONVERTER = new JsonConverter<Request>(new ImmutableMap.Builder<String, Class<? extends Request>>()
+			.put(Order.class.getSimpleName(), Order.class)
+			.put(Login.class.getSimpleName(), Login.class)
+			.put(AccountStateRequest.class.getSimpleName(), AccountStateRequest.class)
+			.put(MarketsRequest.class.getSimpleName(), MarketsRequest.class)
+			.put(MarketPricesRequest.class.getSimpleName(), MarketPricesRequest.class)
+			.put(MarketRegistrationRequest.class.getSimpleName(), MarketRegistrationRequest.class)
+			.put(UserRegistrationRequest.class.getSimpleName(), UserRegistrationRequest.class)
+			.build());
 
 	static Request fromJson(String json) throws Exception {
 		return JSON_CONVERTER.fromJson(json);
@@ -87,17 +92,21 @@ class MarketsRequest extends AuthenticatedRequest {
 	public String type = this.getClass().getSimpleName();
 }
 
-class MarketPricesRequest extends Request {
+class MarketPricesRequest extends AuthenticatedRequest {
 	public String type = this.getClass().getSimpleName();
 	public Long marketId;
+	MarketPricesRequest withMarketId(Long marketId) {this.marketId = marketId; return this;}
 }
 
-class MarketDetails extends Request {
+class MarketRegistrationRequest extends AuthenticatedRequest {
 	public String type = this.getClass().getSimpleName();
 	public Long id;
+	public String name;
+	MarketRegistrationRequest withId(Long id) {this.id = id; return this;}
+	MarketRegistrationRequest withName(String name) {this.name = name; return this;}
 }
 
-class UserRegistrationRequest extends Request {
+class UserRegistrationRequest extends AuthenticatedRequest {
 	public String type = this.getClass().getSimpleName();
 	public String email;
 	public String password;

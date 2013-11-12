@@ -18,6 +18,7 @@ import java.util.UUID;
 import org.apache.log4j.Logger;
 
 import vu.exchange.MarketRegistrationResult.MarketRegistrationStatus;
+import vu.exchange.Markets.MarketDetails;
 import vu.exchange.OrderSubmitResult.OrderStatus;
 import vu.exchange.RequestResponseRepo.RequestDTO;
 import vu.exchange.RequestResponseRepo.ResponseDTO;
@@ -61,18 +62,18 @@ class OrderProcessor {
 	private final Map<Long, Book> marketToBook = new HashMap<Long, OrderProcessor.Book>();
 	private final Map<Long, MarketDetails> marketIdToMarketDetails = new HashMap<Long, MarketDetails>();
 
-	MarketRegistrationResult registerMarket(MarketDetails details) {
-		this.marketIdToMarketDetails.put(details.id, details);
+	MarketRegistrationResult registerMarket(MarketRegistrationRequest details) {
+		this.marketIdToMarketDetails.put(details.id, new MarketDetails().withId(details.id).withName(details.name));
 		if(!this.marketToBook.containsKey(details.id)) {
 			this.marketToBook.put(details.id, new Book());
-			return new MarketRegistrationResult().withStatus(MarketRegistrationStatus.REGISTERED);
+			return new MarketRegistrationResult().withStatus(MarketRegistrationStatus.REGISTERED).withId(details.id);
 		}
 		return new MarketRegistrationResult().withStatus(MarketRegistrationStatus.UPDATED);
 	}
 
 	Markets availableMarkets(MarketsRequest marketsRequest) {
 		Markets markets = new Markets();
-		for (MarketDetails details: marketIdToMarketDetails.values()) {
+		for (Markets.MarketDetails details: marketIdToMarketDetails.values()) {
 			markets.addMarket(details);
 		}
 		return markets;

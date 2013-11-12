@@ -21,16 +21,6 @@ public abstract class Response {
 	}
 }
 
-class OrderSubmitResult extends Response {
-	enum OrderStatus { ACCEPTED, REJECTED }
-	public String type = this.getClass().getSimpleName();
-	public String orderId;
-	public OrderStatus status;
-	OrderSubmitResult withOrderId(String orderId) {this.orderId = orderId; return this;}
-	OrderSubmitResult withStatus(OrderStatus status) {this.status = status; return this;}
-}
-
-
 class LoginResult extends Response {
 	enum LoginStatus { OK, NO_SUCH_USER, WRONG_PASSWORD, ALREADY_LOGGED_IN }
 	public String type = this.getClass().getSimpleName();
@@ -50,6 +40,15 @@ class AccountState extends Response {
 	AccountState withCurrency(Order.Currency currency) {this.currency = currency; return this;}
 }
 
+class OrderSubmitResult extends Response {
+	enum OrderStatus { ACCEPTED, REJECTED }
+	public String type = this.getClass().getSimpleName();
+	public String orderId;
+	public OrderStatus status;
+	OrderSubmitResult withOrderId(String orderId) {this.orderId = orderId; return this;}
+	OrderSubmitResult withStatus(OrderStatus status) {this.status = status; return this;}
+}
+
 class Markets extends Response {
 	public String type = this.getClass().getSimpleName();
 	public List<MarketDetails> markets = new LinkedList<MarketDetails>();
@@ -57,7 +56,15 @@ class Markets extends Response {
 		this.markets.add(details);
 		return this;
 	}
+
+	static class MarketDetails {
+		public Long id;
+		public String name;
+		MarketDetails withId(Long id) {this.id = id; return this;}
+		MarketDetails withName(String name) {this.name = name; return this;}
+	}
 }
+
 class MarketPrices extends Response {
 	public String type = this.getClass().getSimpleName();
 	public Long marketId;
@@ -92,9 +99,15 @@ class MarketRegistrationResult extends Response {
 	enum MarketRegistrationStatus { REGISTERED, UPDATED }
 	public String type = this.getClass().getSimpleName();
 	public MarketRegistrationStatus registrationStatus;
+	public Long id;
 
 	MarketRegistrationResult withStatus(MarketRegistrationStatus registrationStatus) {
 		this.registrationStatus = registrationStatus;
+		return this;
+	}
+
+	public MarketRegistrationResult withId(long id) {
+		this.id = id;
 		return this;
 	}
 }
@@ -103,8 +116,14 @@ class UserRegistrationResult extends Response {
 	enum UserRegistrationStatus { REGISTERED, PASSWORD_UPDATED, BALANCE_UPDATED }
 	public String type = this.getClass().getSimpleName();
 	public UserRegistrationStatus registrationStatus;
+	public String email;
+
 	UserRegistrationResult withStatus(UserRegistrationStatus registrationStatus) {
 		this.registrationStatus = registrationStatus;
+		return this;
+	}
+	UserRegistrationResult withEmail(String email) {
+		this.email = email;
 		return this;
 	}
 }
