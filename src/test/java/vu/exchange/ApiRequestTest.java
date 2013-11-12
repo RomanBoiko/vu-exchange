@@ -16,9 +16,9 @@ import vu.exchange.Order.Position;
 
 public class ApiRequestTest {
 
-	private static final String ORDER = "{\"type\":\"Order\",\"session\":\"sessionId\",\"market\":1,\"price\":1.1,\"currency\":\"GBP\",\"quantity\":1.2,\"position\":\"SELL\"}";
+	private static final String ORDER = "{\"sessionId\":\"sessionId\",\"type\":\"Order\",\"marketId\":1,\"price\":1.1,\"currency\":\"GBP\",\"quantity\":1.2,\"position\":\"SELL\"}";
 	private static final String LOGIN = "{\"type\":\"Login\",\"email\":\"email@email.com\",\"password\":\"pass\"}";
-	private static final String ACCOUNT_STATE_REQUEST = "{\"type\":\"AccountStateRequest\",\"session\":\"sessionId\"}";
+	private static final String ACCOUNT_STATE_REQUEST = "{\"sessionId\":\"sessionId\",\"type\":\"AccountStateRequest\"}";
 
 	@Test
 	public void shouldGenerateOrderWithTimestampAsPartOfUniqueId() {
@@ -36,19 +36,19 @@ public class ApiRequestTest {
 
 	@Test
 	public void shouldSerializeOrder() throws Exception {
-		String orderRequest = new Order().withMarket(1L).withPosition(Position.SELL).withPrice(1.1).withQuantity(1.2).withSession("sessionId").toJson();
+		String orderRequest = new Order().withMarket(1L).withPosition(Position.SELL).withPrice(1.1).withQuantity(1.2).withSessionId("sessionId").toJson();
 		assertThat(orderRequest, is(ORDER));
 	}
 
 	@Test
 	public void shouldDeserializeOrder() throws Exception {
 		Order order = (Order)Request.fromJson(ORDER);
-		assertThat(order.market, is(1L));
+		assertThat(order.marketId, is(1L));
 		assertThat(order.price, is(BigDecimal.valueOf(1.1)));
 		assertThat(order.currency, is(Currency.GBP));
 		assertThat(order.quantity, is(BigDecimal.valueOf(1.2)));
 		assertThat(order.position, is(Position.SELL));
-		assertThat(order.session, is("sessionId"));
+		assertThat(order.sessionId, is("sessionId"));
 	}
 
 	@Test
@@ -66,13 +66,13 @@ public class ApiRequestTest {
 
 	@Test
 	public void shouldSerializeAccountStateRequest() throws Exception {
-		assertThat(new AccountStateRequest().withSession("sessionId").toJson(), is(ACCOUNT_STATE_REQUEST));
+		assertThat(new AccountStateRequest().withSessionId("sessionId").toJson(), is(ACCOUNT_STATE_REQUEST));
 	}
 
 	@Test
 	public void shouldDeserializeAccountStateRequest() throws Exception {
 		AccountStateRequest accountRequest = (AccountStateRequest)Request.fromJson(ACCOUNT_STATE_REQUEST);
-		assertThat(accountRequest.session, is("sessionId"));
+		assertThat(accountRequest.sessionId, is("sessionId"));
 	}
 
 	private String idPrefix(Long id) {

@@ -6,15 +6,22 @@ import static vu.exchange.LoginResult.LoginStatus.NO_SUCH_USER;
 import static vu.exchange.LoginResult.LoginStatus.OK;
 import static vu.exchange.LoginResult.LoginStatus.WRONG_PASSWORD;
 
+import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.UUID;
 
 import org.apache.log4j.Logger;
 
+import vu.exchange.MarketRegistrationResult.MarketRegistrationStatus;
 import vu.exchange.OrderSubmitResult.OrderStatus;
 import vu.exchange.RequestResponseRepo.RequestDTO;
 import vu.exchange.RequestResponseRepo.ResponseDTO;
+import vu.exchange.UserRegistrationResult.UserRegistrationStatus;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
@@ -25,7 +32,8 @@ public class BusinessProcessor implements EventHandler<ValueEvent>{
 	private final Logger log = Logger.getLogger(this.getClass());
 	private final DisruptorBridge eventProcessor;
 
-	LoginProcessor loginProcessor = new LoginProcessor();
+	private LoginProcessor loginProcessor = new LoginProcessor();
+	private OrderProcessor orderProcessor = new OrderProcessor();
 	
 	BusinessProcessor(DisruptorBridge eventProcessor) {
 		this.eventProcessor = eventProcessor;
@@ -40,18 +48,85 @@ public class BusinessProcessor implements EventHandler<ValueEvent>{
 	
 	Response dispatchRequest(Request request) {
 		if (request instanceof Order) {
-			return order((Order)request);
+			return orderProcessor.order((Order)request);
 		} else if (request instanceof Login) {
 			return loginProcessor.login((Login) request);
 		} else {
 			throw new IllegalArgumentException("request not supported: " + request);
 		}
+	}
+}
 
+class OrderProcessor {
+	private final Map<Long, Book> marketToBook = new HashMap<Long, OrderProcessor.Book>();
+	private final Map<Long, MarketDetails> marketIdToMarketDetails = new HashMap<Long, MarketDetails>();
+
+	MarketRegistrationResult registerMarket(MarketDetails details) {
+		this.marketIdToMarketDetails.put(details.id, details);
+		if(!this.marketToBook.containsKey(details.id)) {
+			this.marketToBook.put(details.id, new Book());
+			return new MarketRegistrationResult().withStatus(MarketRegistrationStatus.REGISTERED);
+		}
+		return new MarketRegistrationResult().withStatus(MarketRegistrationStatus.UPDATED);
 	}
 
+	Markets availableMarkets(MarketsRequest marketsRequest) {
+		Markets markets = new Markets();
+		for (MarketDetails details: marketIdToMarketDetails.values()) {
+			markets.addMarket(details);
+		}
+		return markets;
+	}
 
-	private OrderSubmitResult order(Order order) {
+	MarketPrices marketPrices(MarketPricesRequest pricesRequest) {
+		MarketPrices marketPrices =  new MarketPrices().withMarket(pricesRequest.marketId);
+		for(List<Order> bidsList: marketToBook.get(pricesRequest.marketId).bids.values()) {
+			for(Order bid: bidsList) {
+				marketPrices.addBid(new MarketPrices.ProductUnit(bid.price, bid.quantity));
+			}
+		}
+		for(List<Order> offersList: marketToBook.get(pricesRequest.marketId).offers.values()) {
+			for(Order offer: offersList) {
+				marketPrices.addOffer(new MarketPrices.ProductUnit(offer.price, offer.quantity));
+			}
+		}
+		return marketPrices;
+	}
+
+	OrderSubmitResult order(Order order) {
+		if(!this.marketToBook.containsKey(order.marketId)) {
+			return new OrderSubmitResult().withOrderId(order.id().toString()).withStatus(OrderStatus.REJECTED);
+		}
+		this.marketToBook.get(order.marketId).addOrder(order);
 		return new OrderSubmitResult().withOrderId(order.id().toString()).withStatus(OrderStatus.ACCEPTED);
+	}
+
+	private static class Book {
+
+		private TreeMap<BigDecimal, List<Order>> offers = new TreeMap<BigDecimal, List<Order>>();
+		private TreeMap<BigDecimal, List<Order>> bids = new TreeMap<BigDecimal, List<Order>>(new DescComparator());
+		void addOrder(Order order) {
+			if(order.position.equals(Order.Position.BUY)) {
+				putOrder(order, bids);
+			} else {
+				putOrder(order, offers);
+			}
+		}
+
+		private void putOrder(Order order, Map<BigDecimal, List<Order>> ordersMap) {
+			List<Order> orders = ordersMap.get(order.price);
+			if (orders == null) {
+				orders = new LinkedList<Order>();
+				ordersMap.put(order.price, orders);
+			}
+			orders.add(order);
+		}
+
+		private static final class DescComparator implements Comparator<BigDecimal> {
+			public int compare(BigDecimal o1, BigDecimal o2) {
+				return o2.compareTo(o1);
+			}
+		}
 	}
 }
 
@@ -61,8 +136,9 @@ class LoginProcessor {
 			new ImmutableMap.Builder<String, String>().put("user1@smarkets.com", "pass1").build());
 	private BiMap<String, String> sessionToLogin = HashBiMap.create();
 
-	void registerUser(String email, String password) {
-		email2Password.put(email, password);
+	UserRegistrationResult registerUser(UserRegistrationRequest userRegistrationRequest) {
+		email2Password.put(userRegistrationRequest.email, userRegistrationRequest.password);
+		return new UserRegistrationResult().withStatus(UserRegistrationStatus.REGISTERED);
 	}
 
 	LoginResult login(Login login) {

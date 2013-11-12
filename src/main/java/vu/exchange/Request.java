@@ -44,25 +44,6 @@ public abstract class Request {
 	}
 }
 
-class Order extends Request {
-	static enum Position { BUY, SELL }
-	static enum Currency { GBP }
-
-	public String type = this.getClass().getSimpleName();
-	public String session = "default-session-id";
-	public Long market = 0L;
-	public BigDecimal price = BigDecimal.valueOf(0);
-	public Currency currency = Currency.GBP;
-	public BigDecimal quantity = BigDecimal.valueOf(0);
-	public Position position = Position.BUY;
-
-	Order withPosition(Position position) {this.position = position; return this;}
-	Order withPrice(double price) {this.price = BigDecimal.valueOf(price); return this;}
-	Order withQuantity(double quantity) {this.quantity = BigDecimal.valueOf(quantity); return this;}
-	Order withMarket(long market) {this.market = market; return this;}
-	Order withSession(String session) {this.session = session; return this;}
-}
-
 class Login extends Request {
 	public String type = this.getClass().getSimpleName();
 	public String email = "some@somewhere.com";
@@ -72,8 +53,54 @@ class Login extends Request {
 	Login withPassword(String password) {this.password = password; return this;}
 }
 
-class AccountStateRequest extends Request {
+abstract class AuthenticatedRequest extends Request {
+	public String sessionId = "default-session-id";
+
+	AuthenticatedRequest withSessionId(String sessionId) {
+		this.sessionId = sessionId;
+		return this;
+	}
+}
+
+class Order extends AuthenticatedRequest {
+	static enum Position { BUY, SELL }
+	static enum Currency { GBP }
+	
 	public String type = this.getClass().getSimpleName();
-	public String session = "default-session-id";
-	AccountStateRequest withSession(String session) {this.session = session; return this;}
+	public Long marketId = 0L;
+	public BigDecimal price = BigDecimal.valueOf(0);
+	public Currency currency = Currency.GBP;
+	public BigDecimal quantity = BigDecimal.valueOf(0);
+	public Position position = Position.BUY;
+	
+	Order withPosition(Position position) {this.position = position; return this;}
+	Order withPrice(double price) {this.price = BigDecimal.valueOf(price); return this;}
+	Order withQuantity(double quantity) {this.quantity = BigDecimal.valueOf(quantity); return this;}
+	Order withMarket(long marketId) {this.marketId = marketId; return this;}
+}
+
+class AccountStateRequest extends AuthenticatedRequest {
+	public String type = this.getClass().getSimpleName();
+}
+
+class MarketsRequest extends AuthenticatedRequest {
+	public String type = this.getClass().getSimpleName();
+}
+
+class MarketPricesRequest extends Request {
+	public String type = this.getClass().getSimpleName();
+	public Long marketId;
+}
+
+class MarketDetails extends Request {
+	public String type = this.getClass().getSimpleName();
+	public Long id;
+}
+
+class UserRegistrationRequest extends Request {
+	public String type = this.getClass().getSimpleName();
+	public String email;
+	public String password;
+	UserRegistrationRequest withEmail(String email) {this.email = email; return this;}
+	UserRegistrationRequest withPassword(String password) {this.password = password; return this;}
 }

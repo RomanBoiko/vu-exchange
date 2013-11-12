@@ -20,7 +20,7 @@ public class LoginProcessorTest {
 	@Before
 	public void setUp() {
 		loginProcessor = new LoginProcessor();
-		loginProcessor.registerUser(EMAIL, PASSWORD);
+		loginProcessor.registerUser(new UserRegistrationRequest().withEmail(EMAIL).withPassword(PASSWORD));
 	}
 
 	@Test
@@ -55,9 +55,8 @@ public class LoginProcessorTest {
 	@Test
 	public void shouldReturnUniqueSessionIds() {
 		LoginResult loginResult1 = loginProcessor.login(new Login().withEmail(EMAIL).withPassword(PASSWORD));
-		loginProcessor.registerUser(EMAIL + 1, PASSWORD + 1);
+		loginProcessor.registerUser(new UserRegistrationRequest().withEmail(EMAIL + 1).withPassword(PASSWORD + 1));
 		LoginResult loginResult2 = loginProcessor.login(new Login().withEmail(EMAIL + 1).withPassword(PASSWORD + 1));
 		assertThat(loginResult1.sessionId, is(not(loginResult2.sessionId)));
 	}
-
 }

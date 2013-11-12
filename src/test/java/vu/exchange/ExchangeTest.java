@@ -28,7 +28,7 @@ public class ExchangeTest {
 	public void shouldAcceptOrders() throws Exception {
 		Response apiResponse = getE2EExchangeResponse(new Order());
 		assertThat(apiResponse, instanceOf(OrderSubmitResult.class));
-		assertThat(((OrderSubmitResult)apiResponse).status, is(OrderSubmitResult.OrderStatus.ACCEPTED));
+		assertThat(((OrderSubmitResult)apiResponse).status, is(OrderSubmitResult.OrderStatus.REJECTED));
 	}
 
 	@Test
