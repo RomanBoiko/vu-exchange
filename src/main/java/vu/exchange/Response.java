@@ -113,7 +113,7 @@ class MarketRegistrationResult extends Response {
 }
 
 class UserRegistrationResult extends Response {
-	enum UserRegistrationStatus { REGISTERED, PASSWORD_UPDATED, BALANCE_UPDATED }
+	enum UserRegistrationStatus { REGISTERED, PASSWORD_UPDATED, UNCHANGED  }
 	public String type = this.getClass().getSimpleName();
 	public UserRegistrationStatus registrationStatus;
 	public String email;

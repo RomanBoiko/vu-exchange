@@ -133,20 +133,39 @@ class OrderProcessor {
 
 
 class LoginProcessor {
-	private final Map<String, String> email2Password = new HashMap<String, String>(
-			new ImmutableMap.Builder<String, String>().put("user1@smarkets.com", "pass1").build());
-	private BiMap<String, String> sessionToLogin = HashBiMap.create();
+	private static class UserDetails {
+		public String password;
+		UserDetails withPassword(String password) {this.password = password; return this; }
+	}
+
+	private final Map<String, UserDetails> email2Details = new HashMap<String, UserDetails>(
+			new ImmutableMap.Builder<String, UserDetails>()
+				.put("user1@smarkets.com", new UserDetails().withPassword("pass1"))
+				.build());
+	private BiMap<String, String> sessionToEmail = HashBiMap.create();
 
 	UserRegistrationResult registerUser(UserRegistrationRequest userRegistrationRequest) {
-		email2Password.put(userRegistrationRequest.email, userRegistrationRequest.password);
-		return new UserRegistrationResult().withStatus(UserRegistrationStatus.REGISTERED);
+		UserDetails existingUserDetails = email2Details.get(userRegistrationRequest.email);
+		if(null == existingUserDetails) {
+			email2Details.put(userRegistrationRequest.email, new UserDetails().withPassword(userRegistrationRequest.password));
+			return registrationResult(userRegistrationRequest, UserRegistrationStatus.REGISTERED);
+		} else if(! existingUserDetails.password.equals(userRegistrationRequest.password)){
+			existingUserDetails.withPassword(userRegistrationRequest.password);
+			return registrationResult(userRegistrationRequest, UserRegistrationStatus.PASSWORD_UPDATED);
+		} else {
+			return registrationResult(userRegistrationRequest, UserRegistrationStatus.UNCHANGED);
+		}
+	}
+
+	private UserRegistrationResult registrationResult(UserRegistrationRequest userRegistrationRequest, UserRegistrationStatus status) {
+		return new UserRegistrationResult().withStatus(status).withEmail(userRegistrationRequest.email);
 	}
 
 	LoginResult login(Login login) {
-		String password = email2Password.get(login.email);
-		if(null == password) {
+		UserDetails existingUserDetails = email2Details.get(login.email);
+		if(null == existingUserDetails) {
 			return new LoginResult().withStatus(NO_SUCH_USER);
-		} else if (password.equals(login.password)) {
+		} else if (existingUserDetails.password.equals(login.password)) {
 			return onCorrectCredentials(login);
 		} else {
 			return new LoginResult().withStatus(WRONG_PASSWORD);
@@ -154,7 +173,7 @@ class LoginProcessor {
 	}
 
 	private LoginResult onCorrectCredentials(Login login) {
-		String existingSessionId = sessionToLogin.inverse().get(login.email);
+		String existingSessionId = sessionToEmail.inverse().get(login.email);
 		if(existingSessionId == null) {
 			return loggedInSuccessfuly(login);
 		} else {
@@ -164,7 +183,7 @@ class LoginProcessor {
 
 	private LoginResult loggedInSuccessfuly(Login login) {
 		String sessionId = UUID.randomUUID().toString();
-		sessionToLogin.put(sessionId, login.email);
+		sessionToEmail.put(sessionId, login.email);
 		return new LoginResult().withStatus(OK).withSessionId(sessionId);
 	}
 }

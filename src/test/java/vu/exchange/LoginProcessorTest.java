@@ -10,6 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import vu.exchange.LoginResult.LoginStatus;
+import vu.exchange.UserRegistrationResult.UserRegistrationStatus;
 
 public class LoginProcessorTest {
 	private static final String EMAIL = "email";
@@ -21,6 +22,27 @@ public class LoginProcessorTest {
 	public void setUp() {
 		loginProcessor = new LoginProcessor();
 		loginProcessor.registerUser(new UserRegistrationRequest().withEmail(EMAIL).withPassword(PASSWORD));
+	}
+
+	@Test
+	public void shouldRegisterNewUser() {
+		UserRegistrationResult registrationResult = loginProcessor.registerUser(new UserRegistrationRequest().withEmail(EMAIL + 1).withPassword(PASSWORD));
+		assertThat(registrationResult.registrationStatus, is(UserRegistrationStatus.REGISTERED));
+		assertThat(registrationResult.email, is(EMAIL + 1));
+	}
+
+	@Test
+	public void shouldUpdatePasswordForExistingUser() {
+		UserRegistrationResult registrationResult = loginProcessor.registerUser(new UserRegistrationRequest().withEmail(EMAIL).withPassword(PASSWORD + 1));
+		assertThat(registrationResult.registrationStatus, is(UserRegistrationStatus.PASSWORD_UPDATED));
+		assertThat(registrationResult.email, is(EMAIL));
+	}
+
+	@Test
+	public void shouldLeaveExistingUserUnchanged() {
+		UserRegistrationResult registrationResult = loginProcessor.registerUser(new UserRegistrationRequest().withEmail(EMAIL).withPassword(PASSWORD));
+		assertThat(registrationResult.registrationStatus, is(UserRegistrationStatus.UNCHANGED));
+		assertThat(registrationResult.email, is(EMAIL));
 	}
 
 	@Test
