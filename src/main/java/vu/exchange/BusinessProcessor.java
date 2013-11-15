@@ -68,7 +68,7 @@ class OrderProcessor {
 			this.marketToBook.put(details.id, new Book());
 			return new MarketRegistrationResult().withStatus(MarketRegistrationStatus.REGISTERED).withId(details.id);
 		}
-		return new MarketRegistrationResult().withStatus(MarketRegistrationStatus.UPDATED);
+		return new MarketRegistrationResult().withStatus(MarketRegistrationStatus.UPDATED).withId(details.id);
 	}
 
 	Markets availableMarkets(MarketsRequest marketsRequest) {
@@ -81,14 +81,17 @@ class OrderProcessor {
 
 	MarketPrices marketPrices(MarketPricesRequest pricesRequest) {
 		MarketPrices marketPrices =  new MarketPrices().withMarket(pricesRequest.marketId);
-		for(List<Order> bidsList: marketToBook.get(pricesRequest.marketId).bids.values()) {
-			for(Order bid: bidsList) {
-				marketPrices.addBid(new MarketPrices.ProductUnit(bid.price, bid.quantity));
+		Book book = marketToBook.get(pricesRequest.marketId);
+		if(null != book) {
+			for(List<Order> bidsList: book.bids.values()) {
+				for(Order bid: bidsList) {
+					marketPrices.addBid(new MarketPrices.ProductUnit(bid.price, bid.quantity));
+				}
 			}
-		}
-		for(List<Order> offersList: marketToBook.get(pricesRequest.marketId).offers.values()) {
-			for(Order offer: offersList) {
-				marketPrices.addOffer(new MarketPrices.ProductUnit(offer.price, offer.quantity));
+			for(List<Order> offersList: book.offers.values()) {
+				for(Order offer: offersList) {
+					marketPrices.addOffer(new MarketPrices.ProductUnit(offer.price, offer.quantity));
+				}
 			}
 		}
 		return marketPrices;
