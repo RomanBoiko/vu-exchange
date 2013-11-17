@@ -44,7 +44,12 @@ public class Exchange {
 	Exchange(AppContext context) throws Exception {
 		this.appContext = context;
 		this.responsePublishDisruptor = singleProducerMultipleConsumers(new ResponsePublisher(requestResponseRepo));
-		this.requestSubmitDisruptor = multipleProducersSingleConsumer(new BusinessProcessor(responsePublishDisruptor));
+		BusinessProcessor businessProcessor = new BusinessProcessor(responsePublishDisruptor)
+			.withLoginProcessor(new LoginProcessor()
+				.withSystemUserName(appContext.systemUserName())
+				.withSystemUserPassword(appContext.systemUserPassword()))
+			.withOrderProcessor(new OrderProcessor());
+		this.requestSubmitDisruptor = multipleProducersSingleConsumer(businessProcessor);
 		this.tcpServer = new TcpServer()
 					.withPort(appContext.apiTcpPort())
 					.withNumberOfWorkers(context.inputReceiversCount())

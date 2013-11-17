@@ -46,7 +46,16 @@ class AppContext {
 		return parseInt(this.property("api.tcp.port"));
 	}
 
+	String systemUserName() {
+		return this.property("system.user.name");
+	}
+
+	String systemUserPassword() {
+		return this.property("system.user.pass");
+	}
+
 	String property(String key) {
 		return appProperties.getProperty(key);
 	}
+
 }

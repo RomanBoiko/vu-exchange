@@ -18,6 +18,9 @@ import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableMap;
 
 class LoginProcessor {
+	private String systemUserName;
+	private String systemUserPassword;
+
 	private static class UserDetails {
 		public String password;
 		private BigDecimal credit = BigDecimal.ZERO;
@@ -65,6 +68,9 @@ class LoginProcessor {
 	}
 
 	LoginResult login(Login login) {
+		if(systemUserName.equals(login.email)) {
+			return loginSystemUser(login);
+		}
 		UserDetails existingUserDetails = email2Details.get(login.email);
 		if(null == existingUserDetails) {
 			return new LoginResult().withStatus(NO_SUCH_USER);
@@ -75,6 +81,13 @@ class LoginProcessor {
 		}
 	}
 
+	private LoginResult loginSystemUser(Login login) {
+		if(systemUserPassword.equals(login.password)) {
+			return onCorrectCredentials(login);
+		} else {
+			return new LoginResult().withStatus(WRONG_PASSWORD);
+		}
+	}
 
 	private LoginResult onCorrectCredentials(Login login) {
 		String existingSessionId = sessionToEmail.inverse().get(login.email);
@@ -102,4 +115,43 @@ class LoginProcessor {
 		}
 		return new WithdrawResult().withAmount(request.amount).withWithdrawStatus(WithdrawStatus.FAILURE_ACCOUNT_CREDIT_LOW);
 	}
+
+	LoginProcessor withSystemUserName(String systemUserName) {
+		this.systemUserName = systemUserName;
+		return this;
+	}
+
+	LoginProcessor withSystemUserPassword(String systemUserPassword) {
+		this.systemUserPassword = systemUserPassword;
+		return this;
+	}
+
+	public UserSession sessionDetails(AuthenticatedRequest authenticatedRequest) {
+		String userEmail = sessionToEmail.get(authenticatedRequest.sessionId);
+		if(userEmail == null) {
+			return UserSession.nonValidSession();
+		} else if (userEmail.equals(systemUserName)) {
+			return UserSession.systemUserSession();
+		} else {
+			return UserSession.validUserSession();
+		}
+	}
+
+	static class UserSession {
+		final Boolean isSessionValid;
+		final Boolean hasSystemAdminPermissions;
+		private UserSession(Boolean isSessionValid, Boolean hasSystemAdminPermissions) {
+			this.isSessionValid = isSessionValid;
+			this.hasSystemAdminPermissions = hasSystemAdminPermissions;
+		}
+		static UserSession nonValidSession() {
+			return new UserSession(false, false);
+		}
+		static UserSession systemUserSession() {
+			return new UserSession(true, true);
+		}
+		static UserSession validUserSession() {
+			return new UserSession(true, false);
+		}
+	} 
 }

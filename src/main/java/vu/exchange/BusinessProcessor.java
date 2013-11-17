@@ -14,8 +14,8 @@ public class BusinessProcessor implements EventHandler<ValueEvent>{
 	private final Logger log = Logger.getLogger(this.getClass());
 	private final DisruptorBridge eventProcessor;
 
-	private LoginProcessor loginProcessor = new LoginProcessor();
-	private OrderProcessor orderProcessor = new OrderProcessor();
+	private LoginProcessor loginProcessor;
+	private OrderProcessor orderProcessor;
 	
 	BusinessProcessor(DisruptorBridge eventProcessor) {
 		this.eventProcessor = eventProcessor;
@@ -52,12 +52,12 @@ public class BusinessProcessor implements EventHandler<ValueEvent>{
 		}
 	}
 
-	public BusinessProcessor withLoginProcessor(LoginProcessor loginProcessor) {
+	BusinessProcessor withLoginProcessor(LoginProcessor loginProcessor) {
 		this.loginProcessor = loginProcessor;
 		return this;
 	}
 
-	public BusinessProcessor withOrderProcessor(OrderProcessor orderProcessor) {
+	BusinessProcessor withOrderProcessor(OrderProcessor orderProcessor) {
 		this.orderProcessor = orderProcessor;
 		return this;
 	}

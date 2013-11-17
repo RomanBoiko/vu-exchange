@@ -12,6 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import vu.exchange.AddCreditResult.AddCreditStatus;
+import vu.exchange.LoginProcessor.UserSession;
 import vu.exchange.LoginResult.LoginStatus;
 import vu.exchange.Order.Currency;
 import vu.exchange.UserRegistrationResult.UserRegistrationStatus;
@@ -20,12 +21,14 @@ import vu.exchange.WithdrawResult.WithdrawStatus;
 public class LoginProcessorTest {
 	private static final String EMAIL = "email";
 	private static final String PASSWORD = "pass";
+	private static final String SYSTEM_USER_NAME = "sysuser";
+	private static final String SYSTEM_USER_PASSWORD = "sysuserpass";
 
 	private LoginProcessor loginProcessor;
 
 	@Before
 	public void setUp() {
-		loginProcessor = new LoginProcessor();
+		loginProcessor = new LoginProcessor().withSystemUserName(SYSTEM_USER_NAME).withSystemUserPassword(SYSTEM_USER_PASSWORD);
 		loginProcessor.registerUser(new UserRegistrationRequest().withEmail(EMAIL).withPassword(PASSWORD));
 	}
 
@@ -130,5 +133,31 @@ public class LoginProcessorTest {
 		loginProcessor.registerUser(new UserRegistrationRequest().withEmail(EMAIL + 1).withPassword(PASSWORD + 1));
 		LoginResult loginResult2 = loginProcessor.login(new Login().withEmail(EMAIL + 1).withPassword(PASSWORD + 1));
 		assertThat(loginResult1.sessionId, is(not(loginResult2.sessionId)));
+	}
+
+	@Test
+	public void shouldReportValidSessionOfUser() {
+		LoginResult loginResult = loginProcessor.login(new Login().withEmail(EMAIL).withPassword(PASSWORD));
+		AuthenticatedRequest authenticatedRequest = new Order().withSessionId(loginResult.sessionId);
+		UserSession session = loginProcessor.sessionDetails(authenticatedRequest);
+		assertThat(session.isSessionValid, is(true));
+		assertThat(session.hasSystemAdminPermissions, is(false));
+	}
+
+	@Test
+	public void shouldReportInvalidSessionOfUser() {
+		AuthenticatedRequest authenticatedRequest = new Order().withSessionId("unexistingSessionId");
+		UserSession session = loginProcessor.sessionDetails(authenticatedRequest);
+		assertThat(session.isSessionValid, is(false));
+		assertThat(session.hasSystemAdminPermissions, is(false));
+	}
+
+	@Test
+	public void shouldReportSessionOfSystemAdmin() {
+		LoginResult loginResult = loginProcessor.login(new Login().withEmail(SYSTEM_USER_NAME).withPassword(SYSTEM_USER_PASSWORD));
+		AuthenticatedRequest authenticatedRequest = new Order().withSessionId(loginResult.sessionId);
+		UserSession session = loginProcessor.sessionDetails(authenticatedRequest);
+		assertThat(session.isSessionValid, is(true));
+		assertThat(session.hasSystemAdminPermissions, is(true));
 	}
 }
