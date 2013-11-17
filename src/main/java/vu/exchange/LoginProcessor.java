@@ -15,7 +15,6 @@ import vu.exchange.WithdrawResult.WithdrawStatus;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import com.google.common.collect.ImmutableMap;
 
 class LoginProcessor {
 	private String systemUserName;
@@ -39,10 +38,7 @@ class LoginProcessor {
 		}
 	}
 
-	private final Map<String, UserDetails> email2Details = new HashMap<String, UserDetails>(
-			new ImmutableMap.Builder<String, UserDetails>()
-				.put("user1@smarkets.com", new UserDetails().withPassword("pass1"))
-				.build());
+	private final Map<String, UserDetails> email2Details = new HashMap<String, UserDetails>();
 	private BiMap<String, String> sessionToEmail = HashBiMap.create();
 
 	UserRegistrationResult registerUser(UserRegistrationRequest userRegistrationRequest) {

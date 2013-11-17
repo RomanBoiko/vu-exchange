@@ -5,6 +5,7 @@ import static java.lang.String.format;
 
 import org.apache.log4j.Logger;
 
+import vu.exchange.LoginProcessor.UserSession;
 import vu.exchange.RequestResponseRepo.RequestDTO;
 import vu.exchange.RequestResponseRepo.ResponseDTO;
 
@@ -29,27 +30,36 @@ public class BusinessProcessor implements EventHandler<ValueEvent>{
 	}
 	
 	Response dispatchRequest(Request request) {
-		if (request instanceof Order) {
-			return orderProcessor.order((Order)request);
-		} else if (request instanceof MarketRegistrationRequest) {
-			return orderProcessor.registerMarket((MarketRegistrationRequest) request);
-		} else if (request instanceof MarketPricesRequest) {
-			return orderProcessor.marketPrices((MarketPricesRequest) request);
-		} else if (request instanceof MarketsRequest) {
-			return orderProcessor.availableMarkets((MarketsRequest) request);
-		} else if (request instanceof AccountStateRequest) {
-			return loginProcessor.accountState((AccountStateRequest) request);
-		} else if (request instanceof Login) {
+		if (request instanceof Login) {
 			return loginProcessor.login((Login) request);
-		} else if (request instanceof UserRegistrationRequest) {
-			return loginProcessor.registerUser((UserRegistrationRequest) request);
-		} else if (request instanceof AddCreditRequest) {
-			return loginProcessor.addCredit((AddCreditRequest) request);
-		} else if (request instanceof WithdrawRequest) {
-			return loginProcessor.withdraw((WithdrawRequest) request);
-		} else {
-			throw new IllegalArgumentException("request not supported: " + request);
+		} else if(request instanceof AuthenticatedRequest) {
+			UserSession session = loginProcessor.sessionDetails((AuthenticatedRequest) request);
+			if(!session.isSessionValid) {
+				return new InvalidSessionResponse();
+			}
+			if(session.hasSystemAdminPermissions) {
+				if (request instanceof MarketRegistrationRequest) {
+					return orderProcessor.registerMarket((MarketRegistrationRequest) request);
+				} else if (request instanceof UserRegistrationRequest) {
+					return loginProcessor.registerUser((UserRegistrationRequest) request);
+				} else if (request instanceof AddCreditRequest) {
+					return loginProcessor.addCredit((AddCreditRequest) request);
+				} else if (request instanceof WithdrawRequest) {
+					return loginProcessor.withdraw((WithdrawRequest) request);
+				}
+			}
+			if (request instanceof Order) {
+				return orderProcessor.order((Order)request);
+			} else if (request instanceof MarketPricesRequest) {
+				return orderProcessor.marketPrices((MarketPricesRequest) request);
+			} else if (request instanceof MarketsRequest) {
+				return orderProcessor.availableMarkets((MarketsRequest) request);
+			} else if (request instanceof AccountStateRequest) {
+				return loginProcessor.accountState((AccountStateRequest) request);
+			}
 		}
+
+		throw new IllegalArgumentException("request not supported: " + request);
 	}
 
 	BusinessProcessor withLoginProcessor(LoginProcessor loginProcessor) {

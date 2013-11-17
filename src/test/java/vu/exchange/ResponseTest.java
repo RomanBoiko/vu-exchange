@@ -93,4 +93,10 @@ public class ResponseTest {
 				.toJson(),
 					is("{\"type\":\"WithdrawResult\",\"status\":\"FAILURE_ACCOUNT_CREDIT_LOW\",\"amount\":21.1}"));
 	}
+
+	@Test
+	public void shouldSerializeInvalidSessionResponse() throws Exception {
+		assertThat(new InvalidSessionResponse().toJson(),
+					is("{\"type\":\"InvalidSessionResponse\"}"));
+	}
 }

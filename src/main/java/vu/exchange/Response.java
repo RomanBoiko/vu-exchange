@@ -9,10 +9,17 @@ import vu.exchange.Order.Currency;
 import com.google.common.collect.ImmutableMap;
 
 public abstract class Response {
-	private static final JsonConverter<Response> JSON_CONVERTER = new JsonConverter<Response>(ImmutableMap.of(
-			OrderSubmitResult.class.getSimpleName(), OrderSubmitResult.class,
-			LoginResult.class.getSimpleName(), LoginResult.class,
-			AccountState.class.getSimpleName(), AccountState.class));
+	private static final JsonConverter<Response> JSON_CONVERTER = new JsonConverter<Response>(new ImmutableMap.Builder<String, Class<? extends Response>>()
+			.put(OrderSubmitResult.class.getSimpleName(), OrderSubmitResult.class)
+			.put(LoginResult.class.getSimpleName(), LoginResult.class)
+			.put(AccountState.class.getSimpleName(), AccountState.class)
+			.put(Markets.class.getSimpleName(), Markets.class)
+			.put(MarketPrices.class.getSimpleName(), MarketPrices.class)
+			.put(MarketRegistrationResult.class.getSimpleName(), MarketRegistrationResult.class)
+			.put(UserRegistrationResult.class.getSimpleName(), UserRegistrationResult.class)
+			.put(AddCreditResult.class.getSimpleName(), AddCreditResult.class)
+			.put(WithdrawResult.class.getSimpleName(), WithdrawResult.class)
+			.put(InvalidSessionResponse.class.getSimpleName(), InvalidSessionResponse.class).build());
 
 	static Response fromJson(String json) throws Exception {
 		return JSON_CONVERTER.fromJson(json);
@@ -88,12 +95,13 @@ class MarketPrices extends Response {
 	}
 	
 	static class ProductUnit {
-		public final BigDecimal price;
-		public final BigDecimal quantity;
+		public BigDecimal price;
+		public BigDecimal quantity;
 		public ProductUnit(BigDecimal price, BigDecimal quantity) {
 			this.price = price;
 			this.quantity = quantity;
 		}
+		public ProductUnit() { }
 	}
 }
 
@@ -145,4 +153,8 @@ class WithdrawResult extends Response {
 	public BigDecimal amount = BigDecimal.valueOf(0);
 	WithdrawResult withAmount(BigDecimal amount) {this.amount = amount; return this;}
 	WithdrawResult withWithdrawStatus(WithdrawStatus status) {this.status = status; return this;}
+}
+
+class InvalidSessionResponse extends Response {
+	public String type = this.getClass().getSimpleName();
 }
