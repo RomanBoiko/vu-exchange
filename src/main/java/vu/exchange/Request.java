@@ -26,6 +26,8 @@ public abstract class Request {
 			.put(MarketPricesRequest.class.getSimpleName(), MarketPricesRequest.class)
 			.put(MarketRegistrationRequest.class.getSimpleName(), MarketRegistrationRequest.class)
 			.put(UserRegistrationRequest.class.getSimpleName(), UserRegistrationRequest.class)
+			.put(AddCreditRequest.class.getSimpleName(), AddCreditRequest.class)
+			.put(WithdrawRequest.class.getSimpleName(), WithdrawRequest.class)
 			.build());
 
 	static Request fromJson(String json) throws Exception {
@@ -67,6 +69,36 @@ abstract class AuthenticatedRequest extends Request {
 	}
 }
 
+class UserRegistrationRequest extends AuthenticatedRequest {
+	public String type = this.getClass().getSimpleName();
+	public String email;
+	public String password;
+	UserRegistrationRequest withEmail(String email) {this.email = email; return this;}
+	UserRegistrationRequest withPassword(String password) {this.password = password; return this;}
+}
+
+class AddCreditRequest extends AuthenticatedRequest {
+	public String type = this.getClass().getSimpleName();
+	public String email;
+	public BigDecimal amount = BigDecimal.valueOf(0);
+	AddCreditRequest withEmail(String email) {this.email = email; return this;}
+	AddCreditRequest withAmount(double amount) {this.amount = BigDecimal.valueOf(amount); return this;}
+}
+
+class WithdrawRequest extends AuthenticatedRequest {
+	public String type = this.getClass().getSimpleName();
+	public String email;
+	public BigDecimal amount = BigDecimal.valueOf(0);
+	WithdrawRequest withEmail(String email) {this.email = email; return this;}
+	WithdrawRequest withAmount(double amount) {this.amount = BigDecimal.valueOf(amount); return this;}
+}
+
+class AccountStateRequest extends AuthenticatedRequest {
+	public String type = this.getClass().getSimpleName();
+	public String email;
+	AccountStateRequest withEmail(String email) {this.email = email; return this;}
+}
+
 class Order extends AuthenticatedRequest {
 	static enum Position { BUY, SELL }
 	static enum Currency { GBP }
@@ -82,10 +114,6 @@ class Order extends AuthenticatedRequest {
 	Order withPrice(double price) {this.price = BigDecimal.valueOf(price); return this;}
 	Order withQuantity(double quantity) {this.quantity = BigDecimal.valueOf(quantity); return this;}
 	Order withMarket(long marketId) {this.marketId = marketId; return this;}
-}
-
-class AccountStateRequest extends AuthenticatedRequest {
-	public String type = this.getClass().getSimpleName();
 }
 
 class MarketsRequest extends AuthenticatedRequest {
@@ -104,12 +132,4 @@ class MarketRegistrationRequest extends AuthenticatedRequest {
 	public String name;
 	MarketRegistrationRequest withId(Long id) {this.id = id; return this;}
 	MarketRegistrationRequest withName(String name) {this.name = name; return this;}
-}
-
-class UserRegistrationRequest extends AuthenticatedRequest {
-	public String type = this.getClass().getSimpleName();
-	public String email;
-	public String password;
-	UserRegistrationRequest withEmail(String email) {this.email = email; return this;}
-	UserRegistrationRequest withPassword(String password) {this.password = password; return this;}
 }

@@ -6,11 +6,16 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 
+import java.math.BigDecimal;
+
 import org.junit.Before;
 import org.junit.Test;
 
+import vu.exchange.AddCreditResult.AddCreditStatus;
 import vu.exchange.LoginResult.LoginStatus;
+import vu.exchange.Order.Currency;
 import vu.exchange.UserRegistrationResult.UserRegistrationStatus;
+import vu.exchange.WithdrawResult.WithdrawStatus;
 
 public class LoginProcessorTest {
 	private static final String EMAIL = "email";
@@ -72,6 +77,51 @@ public class LoginProcessorTest {
 		LoginResult loginResult = loginProcessor.login(new Login().withEmail(EMAIL + 1).withPassword(PASSWORD));
 		assertThat(loginResult.status, is(LoginStatus.NO_SUCH_USER));
 		assertThat(loginResult.sessionId, nullValue());
+	}
+
+	@Test
+	public void shouldAddCreditToAccount() {
+		AddCreditResult addCreditResult = loginProcessor.addCredit(new AddCreditRequest().withEmail(EMAIL).withAmount(1.2));
+		assertThat(addCreditResult.status, is(AddCreditStatus.SUCCESS));
+		assertThat(addCreditResult.amount, is(BigDecimal.valueOf(1.2)));
+	}
+
+	@Test
+	public void shouldNotWithdrawFromAccountWithNotEnoughMoneyOnIt() {
+		WithdrawResult withdrawResult = loginProcessor.withdraw(new WithdrawRequest().withEmail(EMAIL).withAmount(1.2));
+		assertThat(withdrawResult.status, is(WithdrawStatus.FAILURE_ACCOUNT_CREDIT_LOW));
+		assertThat(withdrawResult.amount, is(BigDecimal.valueOf(1.2)));
+	}
+
+	@Test
+	public void shouldWithdrawFromAccount() {
+		loginProcessor.addCredit(new AddCreditRequest().withEmail(EMAIL).withAmount(1.2));
+		WithdrawResult withdrawResult = loginProcessor.withdraw(new WithdrawRequest().withEmail(EMAIL).withAmount(1.2));
+		assertThat(withdrawResult.status, is(WithdrawStatus.SUCCESS));
+		assertThat(withdrawResult.amount, is(BigDecimal.valueOf(1.2)));
+	}
+	
+	@Test
+	public void shouldReturnCorrectInitialAccountState() {
+		AccountState accountState = loginProcessor.accountState(new AccountStateRequest().withEmail(EMAIL));
+		assertThat(accountState.exposure, is(BigDecimal.ZERO));
+		assertThat(accountState.credit, is(BigDecimal.ZERO));
+		assertThat(accountState.currency, is(Currency.GBP));
+	}
+	
+	@Test
+	public void shouldReturnCorrectAccountStateAfterAddingCredit() {
+		loginProcessor.addCredit(new AddCreditRequest().withEmail(EMAIL).withAmount(1.2));
+		AccountState accountState = loginProcessor.accountState(new AccountStateRequest().withEmail(EMAIL));
+		assertThat(accountState.credit, is(BigDecimal.valueOf(1.2)));
+	}
+
+	@Test
+	public void shouldReturnCorrectAccountStateAfterWithdrawal() {
+		loginProcessor.addCredit(new AddCreditRequest().withEmail(EMAIL).withAmount(1.2));
+		loginProcessor.withdraw(new WithdrawRequest().withEmail(EMAIL).withAmount(1.1));
+		AccountState accountState = loginProcessor.accountState(new AccountStateRequest().withEmail(EMAIL));
+		assertThat(accountState.credit, is(BigDecimal.valueOf(0.1)));
 	}
 
 	@Test

@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.util.LinkedList;
 import java.util.List;
 
+import vu.exchange.Order.Currency;
+
 import com.google.common.collect.ImmutableMap;
 
 public abstract class Response {
@@ -32,10 +34,10 @@ class LoginResult extends Response {
 
 class AccountState extends Response {
 	public String type = this.getClass().getSimpleName();
-	public BigDecimal amount;
-	public BigDecimal exposure;
-	public Order.Currency currency;
-	AccountState withAmount(BigDecimal amount) {this.amount = amount; return this;}
+	public BigDecimal credit = BigDecimal.ZERO;
+	public BigDecimal exposure = BigDecimal.ZERO;
+	public Order.Currency currency = Currency.GBP;
+	AccountState withCredit(BigDecimal credit) {this.credit = credit; return this;}
 	AccountState withExposure(BigDecimal exposure) {this.exposure = exposure; return this;}
 	AccountState withCurrency(Order.Currency currency) {this.currency = currency; return this;}
 }
@@ -126,4 +128,21 @@ class UserRegistrationResult extends Response {
 		this.email = email;
 		return this;
 	}
+}
+
+class AddCreditResult extends Response {
+	enum AddCreditStatus { SUCCESS }
+	public String type = this.getClass().getSimpleName();
+	public AddCreditStatus status = AddCreditStatus.SUCCESS;
+	public BigDecimal amount = BigDecimal.valueOf(0);
+	AddCreditResult withAmount(BigDecimal amount) {this.amount = amount; return this;}
+}
+
+class WithdrawResult extends Response {
+	enum WithdrawStatus { SUCCESS, FAILURE_ACCOUNT_CREDIT_LOW }
+	public String type = this.getClass().getSimpleName();
+	public WithdrawStatus status = WithdrawStatus.SUCCESS;
+	public BigDecimal amount = BigDecimal.valueOf(0);
+	WithdrawResult withAmount(BigDecimal amount) {this.amount = amount; return this;}
+	WithdrawResult withWithdrawStatus(WithdrawStatus status) {this.status = status; return this;}
 }

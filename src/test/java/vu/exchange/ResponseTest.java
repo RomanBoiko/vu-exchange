@@ -13,6 +13,7 @@ import vu.exchange.MarketPrices.ProductUnit;
 import vu.exchange.MarketRegistrationResult.MarketRegistrationStatus;
 import vu.exchange.OrderSubmitResult.OrderStatus;
 import vu.exchange.UserRegistrationResult.UserRegistrationStatus;
+import vu.exchange.WithdrawResult.WithdrawStatus;
 
 public class ResponseTest {
 
@@ -30,8 +31,8 @@ public class ResponseTest {
 
 	@Test
 	public void shouldSerializeAccountState() throws Exception {
-		assertThat(new AccountState().withAmount(valueOf(13.4)).withExposure(valueOf(3.5)).withCurrency(Order.Currency.GBP).toJson(),
-					is("{\"type\":\"AccountState\",\"amount\":13.4,\"exposure\":3.5,\"currency\":\"GBP\"}"));
+		assertThat(new AccountState().withCredit(valueOf(13.4)).withExposure(valueOf(3.5)).withCurrency(Order.Currency.GBP).toJson(),
+					is("{\"type\":\"AccountState\",\"credit\":13.4,\"exposure\":3.5,\"currency\":\"GBP\"}"));
 	}
 
 	@Test
@@ -74,5 +75,22 @@ public class ResponseTest {
 				.withEmail("some@com")
 				.toJson(),
 					is("{\"type\":\"UserRegistrationResult\",\"registrationStatus\":\"REGISTERED\",\"email\":\"some@com\"}"));
+	}
+
+	@Test
+	public void shouldSerializeAddCreditResult() throws Exception {
+		assertThat(new AddCreditResult()
+				.withAmount(BigDecimal.valueOf(21.1))
+				.toJson(),
+					is("{\"type\":\"AddCreditResult\",\"status\":\"SUCCESS\",\"amount\":21.1}"));
+	}
+
+	@Test
+	public void shouldSerializeWithdrawResult() throws Exception {
+		assertThat(new WithdrawResult()
+				.withAmount(BigDecimal.valueOf(21.1))
+				.withWithdrawStatus(WithdrawStatus.FAILURE_ACCOUNT_CREDIT_LOW)
+				.toJson(),
+					is("{\"type\":\"WithdrawResult\",\"status\":\"FAILURE_ACCOUNT_CREDIT_LOW\",\"amount\":21.1}"));
 	}
 }

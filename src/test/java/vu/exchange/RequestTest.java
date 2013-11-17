@@ -18,11 +18,13 @@ public class RequestTest {
 
 	private static final String ORDER = "{\"sessionId\":\"sessionId\",\"type\":\"Order\",\"marketId\":1,\"price\":1.1,\"currency\":\"GBP\",\"quantity\":1.2,\"position\":\"SELL\"}";
 	private static final String LOGIN = "{\"type\":\"Login\",\"email\":\"email@email.com\",\"password\":\"pass\"}";
-	private static final String ACCOUNT_STATE_REQUEST = "{\"sessionId\":\"sessionId\",\"type\":\"AccountStateRequest\"}";
+	private static final String ACCOUNT_STATE_REQUEST = "{\"sessionId\":\"sessionId\",\"type\":\"AccountStateRequest\",\"email\":\"email@com\"}";
 	private static final String MARKETS_REQUEST = "{\"sessionId\":\"sessionId\",\"type\":\"MarketsRequest\"}";
 	private static final String MARKET_PRICES_REQUEST = "{\"sessionId\":\"sessionId\",\"type\":\"MarketPricesRequest\",\"marketId\":111}";
 	private static final String MARKET_REGISTRATION_REQUEST = "{\"id\":111,\"sessionId\":\"sessionId\",\"type\":\"MarketRegistrationRequest\",\"name\":\"mname\"}";
 	private static final String USER_REGISTRATION_REQUEST = "{\"sessionId\":\"sessionId\",\"type\":\"UserRegistrationRequest\",\"email\":\"email@com\",\"password\":\"secret\"}";
+	private static final String ADD_CREDIT_REQUEST = "{\"sessionId\":\"sessionId\",\"type\":\"AddCreditRequest\",\"email\":\"email@com\",\"amount\":1.2}";
+	private static final String WITHDRAW_REQUEST = "{\"sessionId\":\"sessionId\",\"type\":\"WithdrawRequest\",\"email\":\"email@com\",\"amount\":1.2}";
 	
 
 	@Test
@@ -71,13 +73,14 @@ public class RequestTest {
 
 	@Test
 	public void shouldSerializeAccountStateRequest() throws Exception {
-		assertThat(new AccountStateRequest().withSessionId("sessionId").toJson(), is(ACCOUNT_STATE_REQUEST));
+		assertThat(new AccountStateRequest().withEmail("email@com").withSessionId("sessionId").toJson(), is(ACCOUNT_STATE_REQUEST));
 	}
 
 	@Test
 	public void shouldDeserializeAccountStateRequest() throws Exception {
 		AccountStateRequest accountRequest = (AccountStateRequest)Request.fromJson(ACCOUNT_STATE_REQUEST);
 		assertThat(accountRequest.sessionId, is("sessionId"));
+		assertThat(accountRequest.email, is("email@com"));
 	}
 	
 	@Test
@@ -118,6 +121,26 @@ public class RequestTest {
 	@Test
 	public void shouldDeserializeUserRegistrationRequest() throws Exception {
 		assertThat(((UserRegistrationRequest)Request.fromJson(USER_REGISTRATION_REQUEST)).email, is("email@com"));
+	}
+	
+	@Test
+	public void shouldSerializeAddCreditRequest() throws Exception {
+		assertThat(new AddCreditRequest().withEmail("email@com").withAmount(1.2).withSessionId("sessionId").toJson(), is(ADD_CREDIT_REQUEST));
+	}
+
+	@Test
+	public void shouldDeserializeAddCreditRequest() throws Exception {
+		assertThat(((AddCreditRequest)Request.fromJson(ADD_CREDIT_REQUEST)).amount, is(BigDecimal.valueOf(1.2)));
+	}
+	
+	@Test
+	public void shouldSerializeWithdrawRequest() throws Exception {
+		assertThat(new WithdrawRequest().withEmail("email@com").withAmount(1.2).withSessionId("sessionId").toJson(), is(WITHDRAW_REQUEST));
+	}
+
+	@Test
+	public void shouldDeserializeWithdrawRequest() throws Exception {
+		assertThat(((WithdrawRequest)Request.fromJson(WITHDRAW_REQUEST)).amount, is(BigDecimal.valueOf(1.2)));
 	}
 
 	private String idPrefix(Long id) {
