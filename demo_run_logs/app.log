@@ -1,0 +1,127 @@
+2013-11-17 23:43:50,207  INFO [vu.exchange.Exchange:29][Thread-0] Run app using config: /home/vu/ws/vu-exchange/env/boikoro/app.properties
+2013-11-17 23:43:50,392  INFO [vu.exchange.Exchange:102][Thread-0] PID file written: /home/vu/ws/vu-exchange/target/env/app.pid
+2013-11-17 23:43:50,394  INFO [vu.exchange.Exchange:104][Thread-0] Lock file written: /home/vu/ws/vu-exchange/target/env/app.lock
+2013-11-17 23:43:50,525  INFO [vu.exchange.TcpServer:43][Thread-0] Starting ApiServer
+2013-11-17 23:43:51,160  INFO [vu.exchange.TcpServer:50][Thread-0] ApiServer started
+2013-11-17 23:43:51,161  INFO [vu.exchange.Exchange:95][Thread-0] Lock file disappeared, stopping app
+2013-11-17 23:43:51,162  INFO [vu.exchange.Exchange:80][Thread-0] Stopping exchange
+2013-11-17 23:43:51,162  INFO [vu.exchange.TcpServer:55][Thread-0] Stopping ApiServer
+2013-11-17 23:43:51,183  INFO [vu.exchange.TcpServer:57][Thread-0] ApiServer stopped
+2013-11-17 23:43:51,184  INFO [vu.exchange.Exchange:82][Thread-0] External API server stopped
+2013-11-17 23:43:51,186  INFO [vu.exchange.Exchange:84][Thread-0] Request disruptor stopped
+2013-11-17 23:43:51,200  INFO [vu.exchange.Exchange:86][Thread-0] Response disruptor stopped
+2013-11-17 23:43:51,201  INFO [vu.exchange.Exchange:88][Thread-0] Exchange stopped, pid and lock files removed
+2013-11-17 23:43:53,743  INFO [vu.exchange.TcpServer:43][main] Starting ApiServer
+2013-11-17 23:43:53,783  INFO [vu.exchange.TcpServer:50][main] ApiServer started
+2013-11-17 23:43:54,007 DEBUG [vu.exchange.TcpServer$ApiRequestHandler:85][xWorkerPool-2-thread-1] Request received by worker: {"type":"Login","email":"admin","password":"sOme45Pass"}
+2013-11-17 23:43:54,026 DEBUG [vu.exchange.RequestHandler:35][xWorkerPool-2-thread-1] Request received: {"type":"Login","email":"admin","password":"sOme45Pass"}
+2013-11-17 23:43:54,061 DEBUG [vu.exchange.RequestHandler:39][xWorkerPool-2-thread-1] Request persisted
+2013-11-17 23:43:54,068 DEBUG [vu.exchange.RequestHandler:42][xWorkerPool-2-thread-1] Request forwarded for further processing
+2013-11-17 23:43:54,069 DEBUG [vu.exchange.BusinessProcessor:27][pool-5-thread-1] Processing business event: Sequence: 0; ValueEvent: vu.exchange.RequestResponseRepo$RequestDTO@f12645
+2013-11-17 23:43:54,072 DEBUG [vu.exchange.BusinessProcessor:29][pool-5-thread-1] Request processed, response sent
+2013-11-17 23:43:54,085 DEBUG [vu.exchange.ResponsePublisher:19][pool-4-thread-1] Pushing response to client: vu.exchange.RequestResponseRepo$ResponseDTO@78def
+2013-11-17 23:43:54,094 DEBUG [vu.exchange.TcpServer$ApiRequestHandler:87][xWorkerPool-2-thread-1] Reply sent by worker: {"type":"LoginResult","sessionId":"c10b9f96-5bfd-495f-8fd9-e2ee0399acab","status":"OK"}
+2013-11-17 23:43:54,133 DEBUG [vu.exchange.TcpServer$ApiRequestHandler:85][xWorkerPool-2-thread-1] Request received by worker: {"id":11,"sessionId":"c10b9f96-5bfd-495f-8fd9-e2ee0399acab","type":"MarketRegistrationRequest","name":"France Ukraine 0-1"}
+2013-11-17 23:43:54,139 DEBUG [vu.exchange.RequestHandler:35][xWorkerPool-2-thread-1] Request received: {"id":11,"sessionId":"c10b9f96-5bfd-495f-8fd9-e2ee0399acab","type":"MarketRegistrationRequest","name":"France Ukraine 0-1"}
+2013-11-17 23:43:54,167 DEBUG [vu.exchange.RequestHandler:39][xWorkerPool-2-thread-1] Request persisted
+2013-11-17 23:43:54,168 DEBUG [vu.exchange.RequestHandler:42][xWorkerPool-2-thread-1] Request forwarded for further processing
+2013-11-17 23:43:54,179 DEBUG [vu.exchange.BusinessProcessor:27][pool-5-thread-1] Processing business event: Sequence: 1; ValueEvent: vu.exchange.RequestResponseRepo$RequestDTO@41474e
+2013-11-17 23:43:54,182 DEBUG [vu.exchange.BusinessProcessor:29][pool-5-thread-1] Request processed, response sent
+2013-11-17 23:43:54,183 DEBUG [vu.exchange.ResponsePublisher:19][pool-4-thread-1] Pushing response to client: vu.exchange.RequestResponseRepo$ResponseDTO@1b0626d
+2013-11-17 23:43:54,191 DEBUG [vu.exchange.TcpServer$ApiRequestHandler:87][xWorkerPool-2-thread-1] Reply sent by worker: {"type":"MarketRegistrationResult","registrationStatus":"REGISTERED","id":11}
+2013-11-17 23:43:54,225 DEBUG [vu.exchange.TcpServer$ApiRequestHandler:85][xWorkerPool-2-thread-1] Request received by worker: {"id":12,"sessionId":"c10b9f96-5bfd-495f-8fd9-e2ee0399acab","type":"MarketRegistrationRequest","name":"France Ukraine 1-1"}
+2013-11-17 23:43:54,226 DEBUG [vu.exchange.RequestHandler:35][xWorkerPool-2-thread-1] Request received: {"id":12,"sessionId":"c10b9f96-5bfd-495f-8fd9-e2ee0399acab","type":"MarketRegistrationRequest","name":"France Ukraine 1-1"}
+2013-11-17 23:43:54,243 DEBUG [vu.exchange.RequestHandler:39][xWorkerPool-2-thread-1] Request persisted
+2013-11-17 23:43:54,248 DEBUG [vu.exchange.RequestHandler:42][xWorkerPool-2-thread-1] Request forwarded for further processing
+2013-11-17 23:43:54,248 DEBUG [vu.exchange.BusinessProcessor:27][pool-5-thread-1] Processing business event: Sequence: 2; ValueEvent: vu.exchange.RequestResponseRepo$RequestDTO@10df155
+2013-11-17 23:43:54,253 DEBUG [vu.exchange.BusinessProcessor:29][pool-5-thread-1] Request processed, response sent
+2013-11-17 23:43:54,254 DEBUG [vu.exchange.ResponsePublisher:19][pool-4-thread-1] Pushing response to client: vu.exchange.RequestResponseRepo$ResponseDTO@5f177b
+2013-11-17 23:43:54,274 DEBUG [vu.exchange.TcpServer$ApiRequestHandler:87][xWorkerPool-2-thread-1] Reply sent by worker: {"type":"MarketRegistrationResult","registrationStatus":"REGISTERED","id":12}
+2013-11-17 23:43:54,319 DEBUG [vu.exchange.TcpServer$ApiRequestHandler:85][xWorkerPool-2-thread-1] Request received by worker: {"sessionId":"c10b9f96-5bfd-495f-8fd9-e2ee0399acab","type":"UserRegistrationRequest","email":"user1@smarkets.com","password":"passOfUser1"}
+2013-11-17 23:43:54,320 DEBUG [vu.exchange.RequestHandler:35][xWorkerPool-2-thread-1] Request received: {"sessionId":"c10b9f96-5bfd-495f-8fd9-e2ee0399acab","type":"UserRegistrationRequest","email":"user1@smarkets.com","password":"passOfUser1"}
+2013-11-17 23:43:54,326 DEBUG [vu.exchange.RequestHandler:39][xWorkerPool-2-thread-1] Request persisted
+2013-11-17 23:43:54,336 DEBUG [vu.exchange.RequestHandler:42][xWorkerPool-2-thread-1] Request forwarded for further processing
+2013-11-17 23:43:54,337 DEBUG [vu.exchange.BusinessProcessor:27][pool-5-thread-1] Processing business event: Sequence: 3; ValueEvent: vu.exchange.RequestResponseRepo$RequestDTO@fe8e7a
+2013-11-17 23:43:54,344 DEBUG [vu.exchange.BusinessProcessor:29][pool-5-thread-1] Request processed, response sent
+2013-11-17 23:43:54,370 DEBUG [vu.exchange.ResponsePublisher:19][pool-4-thread-1] Pushing response to client: vu.exchange.RequestResponseRepo$ResponseDTO@3c2cb8
+2013-11-17 23:43:54,376 DEBUG [vu.exchange.TcpServer$ApiRequestHandler:87][xWorkerPool-2-thread-1] Reply sent by worker: {"type":"UserRegistrationResult","registrationStatus":"REGISTERED","email":"user1@smarkets.com"}
+2013-11-17 23:43:54,426 DEBUG [vu.exchange.TcpServer$ApiRequestHandler:85][xWorkerPool-2-thread-1] Request received by worker: {"sessionId":"c10b9f96-5bfd-495f-8fd9-e2ee0399acab","type":"AddCreditRequest","email":"user1@smarkets.com","amount":10.0}
+2013-11-17 23:43:54,427 DEBUG [vu.exchange.RequestHandler:35][xWorkerPool-2-thread-1] Request received: {"sessionId":"c10b9f96-5bfd-495f-8fd9-e2ee0399acab","type":"AddCreditRequest","email":"user1@smarkets.com","amount":10.0}
+2013-11-17 23:43:54,455 DEBUG [vu.exchange.RequestHandler:39][xWorkerPool-2-thread-1] Request persisted
+2013-11-17 23:43:54,464 DEBUG [vu.exchange.RequestHandler:42][xWorkerPool-2-thread-1] Request forwarded for further processing
+2013-11-17 23:43:54,464 DEBUG [vu.exchange.BusinessProcessor:27][pool-5-thread-1] Processing business event: Sequence: 4; ValueEvent: vu.exchange.RequestResponseRepo$RequestDTO@9c22ba
+2013-11-17 23:43:54,469 DEBUG [vu.exchange.BusinessProcessor:29][pool-5-thread-1] Request processed, response sent
+2013-11-17 23:43:54,475 DEBUG [vu.exchange.ResponsePublisher:19][pool-4-thread-1] Pushing response to client: vu.exchange.RequestResponseRepo$ResponseDTO@f2109a
+2013-11-17 23:43:54,499 DEBUG [vu.exchange.TcpServer$ApiRequestHandler:87][xWorkerPool-2-thread-1] Reply sent by worker: {"type":"AddCreditResult","status":"SUCCESS","amount":10.0}
+2013-11-17 23:43:54,578 DEBUG [vu.exchange.TcpServer$ApiRequestHandler:85][xWorkerPool-2-thread-1] Request received by worker: {"type":"Login","email":"user1@smarkets.com","password":"passOfUser1"}
+2013-11-17 23:43:54,583 DEBUG [vu.exchange.RequestHandler:35][xWorkerPool-2-thread-1] Request received: {"type":"Login","email":"user1@smarkets.com","password":"passOfUser1"}
+2013-11-17 23:43:54,593 DEBUG [vu.exchange.RequestHandler:39][xWorkerPool-2-thread-1] Request persisted
+2013-11-17 23:43:54,594 DEBUG [vu.exchange.RequestHandler:42][xWorkerPool-2-thread-1] Request forwarded for further processing
+2013-11-17 23:43:54,596 DEBUG [vu.exchange.BusinessProcessor:27][pool-5-thread-1] Processing business event: Sequence: 5; ValueEvent: vu.exchange.RequestResponseRepo$RequestDTO@201f28
+2013-11-17 23:43:54,597 DEBUG [vu.exchange.BusinessProcessor:29][pool-5-thread-1] Request processed, response sent
+2013-11-17 23:43:54,598 DEBUG [vu.exchange.ResponsePublisher:19][pool-4-thread-1] Pushing response to client: vu.exchange.RequestResponseRepo$ResponseDTO@ddaf79
+2013-11-17 23:43:54,606 DEBUG [vu.exchange.TcpServer$ApiRequestHandler:87][xWorkerPool-2-thread-1] Reply sent by worker: {"type":"LoginResult","sessionId":"458c55c6-a9ef-42d1-b006-5ad4ea5144ac","status":"OK"}
+2013-11-17 23:43:54,630 DEBUG [vu.exchange.TcpServer$ApiRequestHandler:85][xWorkerPool-2-thread-1] Request received by worker: {"sessionId":"458c55c6-a9ef-42d1-b006-5ad4ea5144ac","type":"AccountStateRequest","email":"user1@smarkets.com"}
+2013-11-17 23:43:54,631 DEBUG [vu.exchange.RequestHandler:35][xWorkerPool-2-thread-1] Request received: {"sessionId":"458c55c6-a9ef-42d1-b006-5ad4ea5144ac","type":"AccountStateRequest","email":"user1@smarkets.com"}
+2013-11-17 23:43:54,639 DEBUG [vu.exchange.RequestHandler:39][xWorkerPool-2-thread-1] Request persisted
+2013-11-17 23:43:54,645 DEBUG [vu.exchange.RequestHandler:42][xWorkerPool-2-thread-1] Request forwarded for further processing
+2013-11-17 23:43:54,646 DEBUG [vu.exchange.BusinessProcessor:27][pool-5-thread-1] Processing business event: Sequence: 6; ValueEvent: vu.exchange.RequestResponseRepo$RequestDTO@13e6946
+2013-11-17 23:43:54,647 DEBUG [vu.exchange.BusinessProcessor:29][pool-5-thread-1] Request processed, response sent
+2013-11-17 23:43:54,648 DEBUG [vu.exchange.ResponsePublisher:19][pool-4-thread-1] Pushing response to client: vu.exchange.RequestResponseRepo$ResponseDTO@71a79e
+2013-11-17 23:43:54,672 DEBUG [vu.exchange.TcpServer$ApiRequestHandler:87][xWorkerPool-2-thread-1] Reply sent by worker: {"type":"AccountState","credit":10.0,"exposure":0,"currency":"GBP"}
+2013-11-17 23:43:54,709 DEBUG [vu.exchange.TcpServer$ApiRequestHandler:85][xWorkerPool-2-thread-1] Request received by worker: {"sessionId":"458c55c6-a9ef-42d1-b006-5ad4ea5144ac","type":"MarketsRequest"}
+2013-11-17 23:43:54,709 DEBUG [vu.exchange.RequestHandler:35][xWorkerPool-2-thread-1] Request received: {"sessionId":"458c55c6-a9ef-42d1-b006-5ad4ea5144ac","type":"MarketsRequest"}
+2013-11-17 23:43:54,716 DEBUG [vu.exchange.RequestHandler:39][xWorkerPool-2-thread-1] Request persisted
+2013-11-17 23:43:54,717 DEBUG [vu.exchange.RequestHandler:42][xWorkerPool-2-thread-1] Request forwarded for further processing
+2013-11-17 23:43:54,723 DEBUG [vu.exchange.BusinessProcessor:27][pool-5-thread-1] Processing business event: Sequence: 7; ValueEvent: vu.exchange.RequestResponseRepo$RequestDTO@1b38ff1
+2013-11-17 23:43:54,724 DEBUG [vu.exchange.BusinessProcessor:29][pool-5-thread-1] Request processed, response sent
+2013-11-17 23:43:54,724 DEBUG [vu.exchange.ResponsePublisher:19][pool-4-thread-1] Pushing response to client: vu.exchange.RequestResponseRepo$ResponseDTO@1af39f0
+2013-11-17 23:43:54,773 DEBUG [vu.exchange.TcpServer$ApiRequestHandler:87][xWorkerPool-2-thread-1] Reply sent by worker: {"type":"Markets","markets":[{"id":11,"name":"France Ukraine 0-1"},{"id":12,"name":"France Ukraine 1-1"}]}
+2013-11-17 23:43:54,837 DEBUG [vu.exchange.TcpServer$ApiRequestHandler:85][xWorkerPool-2-thread-1] Request received by worker: {"sessionId":"458c55c6-a9ef-42d1-b006-5ad4ea5144ac","type":"MarketPricesRequest","marketId":11}
+2013-11-17 23:43:54,838 DEBUG [vu.exchange.RequestHandler:35][xWorkerPool-2-thread-1] Request received: {"sessionId":"458c55c6-a9ef-42d1-b006-5ad4ea5144ac","type":"MarketPricesRequest","marketId":11}
+2013-11-17 23:43:54,845 DEBUG [vu.exchange.RequestHandler:39][xWorkerPool-2-thread-1] Request persisted
+2013-11-17 23:43:54,846 DEBUG [vu.exchange.RequestHandler:42][xWorkerPool-2-thread-1] Request forwarded for further processing
+2013-11-17 23:43:54,847 DEBUG [vu.exchange.BusinessProcessor:27][pool-5-thread-1] Processing business event: Sequence: 8; ValueEvent: vu.exchange.RequestResponseRepo$RequestDTO@a7091c
+2013-11-17 23:43:54,848 DEBUG [vu.exchange.BusinessProcessor:29][pool-5-thread-1] Request processed, response sent
+2013-11-17 23:43:54,848 DEBUG [vu.exchange.ResponsePublisher:19][pool-4-thread-1] Pushing response to client: vu.exchange.RequestResponseRepo$ResponseDTO@470fa6
+2013-11-17 23:43:54,890 DEBUG [vu.exchange.TcpServer$ApiRequestHandler:87][xWorkerPool-2-thread-1] Reply sent by worker: {"type":"MarketPrices","marketId":11,"bids":[],"offers":[]}
+2013-11-17 23:43:55,067 DEBUG [vu.exchange.TcpServer$ApiRequestHandler:85][xWorkerPool-2-thread-1] Request received by worker: {"sessionId":"458c55c6-a9ef-42d1-b006-5ad4ea5144ac","type":"Order","marketId":11,"price":23.3,"currency":"GBP","quantity":3.0,"position":"BUY"}
+2013-11-17 23:43:55,068 DEBUG [vu.exchange.RequestHandler:35][xWorkerPool-2-thread-1] Request received: {"sessionId":"458c55c6-a9ef-42d1-b006-5ad4ea5144ac","type":"Order","marketId":11,"price":23.3,"currency":"GBP","quantity":3.0,"position":"BUY"}
+2013-11-17 23:43:55,121 DEBUG [vu.exchange.RequestHandler:39][xWorkerPool-2-thread-1] Request persisted
+2013-11-17 23:43:55,127 DEBUG [vu.exchange.RequestHandler:42][xWorkerPool-2-thread-1] Request forwarded for further processing
+2013-11-17 23:43:55,127 DEBUG [vu.exchange.BusinessProcessor:27][pool-5-thread-1] Processing business event: Sequence: 9; ValueEvent: vu.exchange.RequestResponseRepo$RequestDTO@3d7ca8
+2013-11-17 23:43:55,129 DEBUG [vu.exchange.BusinessProcessor:29][pool-5-thread-1] Request processed, response sent
+2013-11-17 23:43:55,130 DEBUG [vu.exchange.ResponsePublisher:19][pool-4-thread-1] Pushing response to client: vu.exchange.RequestResponseRepo$ResponseDTO@c3135c
+2013-11-17 23:43:55,134 DEBUG [vu.exchange.TcpServer$ApiRequestHandler:87][xWorkerPool-2-thread-1] Reply sent by worker: {"type":"OrderSubmitResult","orderId":"712141384731835068","status":"ACCEPTED"}
+2013-11-17 23:43:55,187 DEBUG [vu.exchange.TcpServer$ApiRequestHandler:85][xWorkerPool-2-thread-1] Request received by worker: {"sessionId":"458c55c6-a9ef-42d1-b006-5ad4ea5144ac","type":"Order","marketId":11,"price":25.5,"currency":"GBP","quantity":4.0,"position":"BUY"}
+2013-11-17 23:43:55,188 DEBUG [vu.exchange.RequestHandler:35][xWorkerPool-2-thread-1] Request received: {"sessionId":"458c55c6-a9ef-42d1-b006-5ad4ea5144ac","type":"Order","marketId":11,"price":25.5,"currency":"GBP","quantity":4.0,"position":"BUY"}
+2013-11-17 23:43:55,267 DEBUG [vu.exchange.RequestHandler:39][xWorkerPool-2-thread-1] Request persisted
+2013-11-17 23:43:55,268 DEBUG [vu.exchange.RequestHandler:42][xWorkerPool-2-thread-1] Request forwarded for further processing
+2013-11-17 23:43:55,269 DEBUG [vu.exchange.BusinessProcessor:27][pool-5-thread-1] Processing business event: Sequence: 10; ValueEvent: vu.exchange.RequestResponseRepo$RequestDTO@12c2fab
+2013-11-17 23:43:55,269 DEBUG [vu.exchange.BusinessProcessor:29][pool-5-thread-1] Request processed, response sent
+2013-11-17 23:43:55,270 DEBUG [vu.exchange.ResponsePublisher:19][pool-4-thread-1] Pushing response to client: vu.exchange.RequestResponseRepo$ResponseDTO@1edbfa6
+2013-11-17 23:43:55,281 DEBUG [vu.exchange.TcpServer$ApiRequestHandler:87][xWorkerPool-2-thread-1] Reply sent by worker: {"type":"OrderSubmitResult","orderId":"807061384731835188","status":"ACCEPTED"}
+2013-11-17 23:43:55,351 DEBUG [vu.exchange.TcpServer$ApiRequestHandler:85][xWorkerPool-2-thread-1] Request received by worker: {"sessionId":"458c55c6-a9ef-42d1-b006-5ad4ea5144ac","type":"Order","marketId":11,"price":30.1,"currency":"GBP","quantity":7.0,"position":"SELL"}
+2013-11-17 23:43:55,351 DEBUG [vu.exchange.RequestHandler:35][xWorkerPool-2-thread-1] Request received: {"sessionId":"458c55c6-a9ef-42d1-b006-5ad4ea5144ac","type":"Order","marketId":11,"price":30.1,"currency":"GBP","quantity":7.0,"position":"SELL"}
+2013-11-17 23:43:55,401 DEBUG [vu.exchange.RequestHandler:39][xWorkerPool-2-thread-1] Request persisted
+2013-11-17 23:43:55,404 DEBUG [vu.exchange.RequestHandler:42][xWorkerPool-2-thread-1] Request forwarded for further processing
+2013-11-17 23:43:55,405 DEBUG [vu.exchange.BusinessProcessor:27][pool-5-thread-1] Processing business event: Sequence: 11; ValueEvent: vu.exchange.RequestResponseRepo$RequestDTO@41931a
+2013-11-17 23:43:55,406 DEBUG [vu.exchange.BusinessProcessor:29][pool-5-thread-1] Request processed, response sent
+2013-11-17 23:43:55,407 DEBUG [vu.exchange.ResponsePublisher:19][pool-4-thread-1] Pushing response to client: vu.exchange.RequestResponseRepo$ResponseDTO@1209745
+2013-11-17 23:43:55,430 DEBUG [vu.exchange.TcpServer$ApiRequestHandler:87][xWorkerPool-2-thread-1] Reply sent by worker: {"type":"OrderSubmitResult","orderId":"692341384731835351","status":"ACCEPTED"}
+2013-11-17 23:43:55,461 DEBUG [vu.exchange.TcpServer$ApiRequestHandler:85][xWorkerPool-2-thread-1] Request received by worker: {"sessionId":"458c55c6-a9ef-42d1-b006-5ad4ea5144ac","type":"MarketPricesRequest","marketId":11}
+2013-11-17 23:43:55,462 DEBUG [vu.exchange.RequestHandler:35][xWorkerPool-2-thread-1] Request received: {"sessionId":"458c55c6-a9ef-42d1-b006-5ad4ea5144ac","type":"MarketPricesRequest","marketId":11}
+2013-11-17 23:43:55,468 DEBUG [vu.exchange.RequestHandler:39][xWorkerPool-2-thread-1] Request persisted
+2013-11-17 23:43:55,469 DEBUG [vu.exchange.RequestHandler:42][xWorkerPool-2-thread-1] Request forwarded for further processing
+2013-11-17 23:43:55,470 DEBUG [vu.exchange.BusinessProcessor:27][pool-5-thread-1] Processing business event: Sequence: 12; ValueEvent: vu.exchange.RequestResponseRepo$RequestDTO@c6cc5e
+2013-11-17 23:43:55,472 DEBUG [vu.exchange.BusinessProcessor:29][pool-5-thread-1] Request processed, response sent
+2013-11-17 23:43:55,472 DEBUG [vu.exchange.ResponsePublisher:19][pool-4-thread-1] Pushing response to client: vu.exchange.RequestResponseRepo$ResponseDTO@1933b00
+2013-11-17 23:43:55,530 DEBUG [vu.exchange.TcpServer$ApiRequestHandler:87][xWorkerPool-2-thread-1] Reply sent by worker: {"type":"MarketPrices","marketId":11,"bids":[{"price":25.5,"quantity":4.0},{"price":23.3,"quantity":3.0}],"offers":[{"price":30.1,"quantity":7.0}]}
+2013-11-17 23:43:55,662  INFO [vu.exchange.Exchange:80][main] Stopping exchange
+2013-11-17 23:43:55,662  INFO [vu.exchange.TcpServer:55][main] Stopping ApiServer
+2013-11-17 23:43:55,683  INFO [vu.exchange.TcpServer:57][main] ApiServer stopped
+2013-11-17 23:43:55,684  INFO [vu.exchange.Exchange:82][main] External API server stopped
+2013-11-17 23:43:55,684  INFO [vu.exchange.Exchange:84][main] Request disruptor stopped
+2013-11-17 23:43:55,685  INFO [vu.exchange.Exchange:86][main] Response disruptor stopped
+2013-11-17 23:43:55,694  INFO [vu.exchange.Exchange:88][main] Exchange stopped, pid and lock files removed
+2013-11-17 23:43:55,724 DEBUG [vu.exchange.ResponsePublisher:19][main] Pushing response to client: vu.exchange.RequestResponseRepo$ResponseDTO@e704a0

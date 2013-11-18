@@ -1,0 +1,13 @@
+2013-11-17T23:43:54:026GMT={"type":"Login","email":"admin","password":"sOme45Pass"}
+2013-11-17T23:43:54:139GMT={"id":11,"sessionId":"c10b9f96-5bfd-495f-8fd9-e2ee0399acab","type":"MarketRegistrationRequest","name":"France Ukraine 0-1"}
+2013-11-17T23:43:54:226GMT={"id":12,"sessionId":"c10b9f96-5bfd-495f-8fd9-e2ee0399acab","type":"MarketRegistrationRequest","name":"France Ukraine 1-1"}
+2013-11-17T23:43:54:320GMT={"sessionId":"c10b9f96-5bfd-495f-8fd9-e2ee0399acab","type":"UserRegistrationRequest","email":"user1@smarkets.com","password":"passOfUser1"}
+2013-11-17T23:43:54:427GMT={"sessionId":"c10b9f96-5bfd-495f-8fd9-e2ee0399acab","type":"AddCreditRequest","email":"user1@smarkets.com","amount":10.0}
+2013-11-17T23:43:54:583GMT={"type":"Login","email":"user1@smarkets.com","password":"passOfUser1"}
+2013-11-17T23:43:54:631GMT={"sessionId":"458c55c6-a9ef-42d1-b006-5ad4ea5144ac","type":"AccountStateRequest","email":"user1@smarkets.com"}
+2013-11-17T23:43:54:709GMT={"sessionId":"458c55c6-a9ef-42d1-b006-5ad4ea5144ac","type":"MarketsRequest"}
+2013-11-17T23:43:54:838GMT={"sessionId":"458c55c6-a9ef-42d1-b006-5ad4ea5144ac","type":"MarketPricesRequest","marketId":11}
+2013-11-17T23:43:55:068GMT={"sessionId":"458c55c6-a9ef-42d1-b006-5ad4ea5144ac","type":"Order","marketId":11,"price":23.3,"currency":"GBP","quantity":3.0,"position":"BUY"}
+2013-11-17T23:43:55:188GMT={"sessionId":"458c55c6-a9ef-42d1-b006-5ad4ea5144ac","type":"Order","marketId":11,"price":25.5,"currency":"GBP","quantity":4.0,"position":"BUY"}
+2013-11-17T23:43:55:351GMT={"sessionId":"458c55c6-a9ef-42d1-b006-5ad4ea5144ac","type":"Order","marketId":11,"price":30.1,"currency":"GBP","quantity":7.0,"position":"SELL"}
+2013-11-17T23:43:55:462GMT={"sessionId":"458c55c6-a9ef-42d1-b006-5ad4ea5144ac","type":"MarketPricesRequest","marketId":11}

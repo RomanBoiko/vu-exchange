@@ -1,11 +1,12 @@
 package vu.exchange;
 
-import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.*;
+import static vu.exchange.LoginResult.LoginStatus;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 
 import org.hamcrest.Matchers;
 import org.junit.After;
@@ -16,7 +17,11 @@ import org.junit.Test;
 import org.xsocket.connection.BlockingConnection;
 import org.xsocket.connection.IBlockingConnection;
 
+import vu.exchange.AddCreditResult.AddCreditStatus;
+import vu.exchange.MarketRegistrationResult.MarketRegistrationStatus;
 import vu.exchange.Order.Position;
+import vu.exchange.OrderSubmitResult.OrderStatus;
+import vu.exchange.UserRegistrationResult.UserRegistrationStatus;
 
 public class BusinessFlowITest {
 
@@ -45,65 +50,96 @@ public class BusinessFlowITest {
 				new Login()
 					.withEmail(APP_CONTEXT.systemUserName())
 					.withPassword(APP_CONTEXT.systemUserPassword()));
+		assertThat(sysUserLoginResult.status, is(LoginStatus.OK));
+
+		String systemUserSessionId = sysUserLoginResult.sessionId;
+
 		MarketRegistrationResult market1RegistrationResult = (MarketRegistrationResult) getExchangeResponse(
 				new MarketRegistrationRequest()
 					.withId(11L)
 					.withName("France Ukraine 0-1")
-					.withSessionId(sysUserLoginResult.sessionId));
+					.withSessionId(systemUserSessionId));
+		assertThat(market1RegistrationResult.registrationStatus, is(MarketRegistrationStatus.REGISTERED));
+
 		MarketRegistrationResult market2RegistrationResult = (MarketRegistrationResult) getExchangeResponse(
 				new MarketRegistrationRequest()
 					.withId(12L)
 					.withName("France Ukraine 1-1")
-					.withSessionId(sysUserLoginResult.sessionId));
+					.withSessionId(systemUserSessionId));
+		assertThat(market2RegistrationResult.registrationStatus, is(MarketRegistrationStatus.REGISTERED));
+
 		UserRegistrationResult userRegistrationResult = (UserRegistrationResult) getExchangeResponse(
 				new UserRegistrationRequest()
 					.withEmail(EMAIL)
 					.withPassword(PASSWORD)
-					.withSessionId(sysUserLoginResult.sessionId));
+					.withSessionId(systemUserSessionId));
+		assertThat(userRegistrationResult.registrationStatus, is(UserRegistrationStatus.REGISTERED));
+
 		AddCreditResult addCreditResult = (AddCreditResult) getExchangeResponse(
 				new AddCreditRequest()
 					.withAmount(10.0)
 					.withEmail(EMAIL)
-					.withSessionId(sysUserLoginResult.sessionId));
+					.withSessionId(systemUserSessionId));
+		assertThat(addCreditResult.status, is(AddCreditStatus.SUCCESS));
+
 		LoginResult clientLoginResult = (LoginResult) getExchangeResponse(
 				new Login()
 					.withEmail(EMAIL)
 					.withPassword(PASSWORD));
+
+		String clientSessionId = clientLoginResult.sessionId;
+
 		AccountState clientAccountState = (AccountState) getExchangeResponse(
 				new AccountStateRequest()
 				.withEmail(EMAIL)
-				.withSessionId(clientLoginResult.sessionId));
-		Markets markets = (Markets) getExchangeResponse(new MarketsRequest().withSessionId(clientLoginResult.sessionId));
-		Long marketId = markets.markets.get(0).id;
+				.withSessionId(clientSessionId));
+		assertThat(clientAccountState.credit, is(BigDecimal.valueOf(10.0)));
+
+		Markets markets = (Markets) getExchangeResponse(new MarketsRequest().withSessionId(clientSessionId));
+		assertThat(markets.markets.size(), is(2));
+
+		Long market1Id = markets.markets.get(0).id;
+
 		MarketPrices pricesBeforeOrders = (MarketPrices) getExchangeResponse(
 				new MarketPricesRequest()
-					.withMarketId(marketId)
-					.withSessionId(clientLoginResult.sessionId));
+					.withMarketId(market1Id)
+					.withSessionId(clientSessionId));
+		assertThat(pricesBeforeOrders.bids.size(), is(0));
+		assertThat(pricesBeforeOrders.offers.size(), is(0));
+		
 		OrderSubmitResult order1SubmitResult = (OrderSubmitResult) getExchangeResponse(
 				new Order()
-				.withMarket(marketId)
+				.withMarket(market1Id)
 				.withPosition(Position.BUY)
 				.withPrice(23.3)
 				.withQuantity(3)
-				.withSessionId(clientLoginResult.sessionId));
+				.withSessionId(clientSessionId));
+		assertThat(order1SubmitResult.status, is(OrderStatus.ACCEPTED));
+
 		OrderSubmitResult order2SubmitResult = (OrderSubmitResult) getExchangeResponse(
 				new Order()
-				.withMarket(marketId)
+				.withMarket(market1Id)
 				.withPosition(Position.BUY)
 				.withPrice(25.5)
 				.withQuantity(4)
-				.withSessionId(clientLoginResult.sessionId));
+				.withSessionId(clientSessionId));
+		assertThat(order2SubmitResult.status, is(OrderStatus.ACCEPTED));
+
 		OrderSubmitResult order3SubmitResult = (OrderSubmitResult) getExchangeResponse(
 				new Order()
-				.withMarket(marketId)
+				.withMarket(market1Id)
 				.withPosition(Position.SELL)
 				.withPrice(30.1)
 				.withQuantity(7)
-				.withSessionId(clientLoginResult.sessionId));
+				.withSessionId(clientSessionId));
+		assertThat(order3SubmitResult.status, is(OrderStatus.ACCEPTED));
+
 		MarketPrices pricesAfterOrders = (MarketPrices) getExchangeResponse(
 				new MarketPricesRequest()
-					.withMarketId(marketId)
-					.withSessionId(clientLoginResult.sessionId));
+					.withMarketId(market1Id)
+					.withSessionId(clientSessionId));
+		assertThat(pricesAfterOrders.bids.size(), is(2));
+		assertThat(pricesAfterOrders.offers.size(), is(1));
 	}
 
 	private Response getExchangeResponse(Request request)
